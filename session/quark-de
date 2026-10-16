@@ -2,8 +2,9 @@
 # Start the Quark desktop session: sway with Quark as the desktop.
 set -eu
 
-config="$(cd "$(dirname "$0")/.." && pwd)/share/quark-de/sway/config"
-readonly config
+share="$(cd "$(dirname "$0")/.." && pwd)/share/quark-de/sway"
+readonly config="$share/config"
+readonly fallback="$share/fallback"
 
 usage() {
 	cat <<USAGE
@@ -43,6 +44,25 @@ check() {
 	return "$missing"
 }
 
+log_dir() {
+	echo "${XDG_STATE_HOME:-${HOME:-}/.local/state}/quark-de"
+}
+
+log() {
+	echo "quark-de: $*" >&2
+	{ mkdir -p "$(log_dir)" && echo "$(date '+%Y-%m-%dT%H:%M:%S%z') $*" >>"$(log_dir)/session.log"; } 2>/dev/null || :
+	if command -v logger >/dev/null 2>&1; then
+		logger -t quark-de "$*" || :
+	fi
+}
+
+need_file() {
+	if [ ! -r "$1" ]; then
+		log "error: $1 is missing — run 'make install' from the quark-de repository, then log in again."
+		exit 1
+	fi
+}
+
 case "${1:-}" in
 -h | --help)
 	usage
@@ -60,9 +80,22 @@ case "${1:-}" in
 	;;
 esac
 
-if ! check sway quark >&2; then
-	echo "quark-de: fix the missing dependencies above, then log in again. 'quark-de --check' lists them all." >&2
+for cmd in foot firefox; do
+	command -v "$cmd" >/dev/null 2>&1 || log "warning: $cmd is missing, so its workspace stays empty — $(hint "$cmd")"
+done
+
+if ! command -v sway >/dev/null 2>&1; then
+	log "error: sway is missing — $(hint sway), then log in again. 'quark-de --check' lists everything missing."
 	exit 1
 fi
 
+if ! command -v quark >/dev/null 2>&1; then
+	need_file "$fallback"
+	QUARK_DE_ERROR="Quark is missing: $(hint quark), then log out and log in again. Details: $(log_dir)/session.log"
+	export QUARK_DE_ERROR
+	log "error: $QUARK_DE_ERROR"
+	exec sway --config "$fallback"
+fi
+
+need_file "$config"
 exec sway --config "$config"
