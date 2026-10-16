@@ -1,0 +1,68 @@
+#!/bin/sh
+# Start the Quark desktop session: sway with Quark as the desktop.
+set -eu
+
+config="$(cd "$(dirname "$0")/.." && pwd)/share/quark-de/sway/config"
+readonly config
+
+usage() {
+	cat <<USAGE
+Usage: quark-de [--check | -h]
+
+Start the Quark desktop session (sway, with Quark as the desktop).
+Usually started by a display manager: pick "Quark" at the login screen.
+
+  --check   (or doctor) list missing dependencies and how to install them
+  -h        show this help
+USAGE
+}
+
+# hint <command>: how to get it.
+hint() {
+	case "$1" in
+	sway | foot | firefox) echo "sudo apt install $1" ;;
+	quark) echo "install the Quark Linux app from https://github.com/autobutler-org/quark/releases and put 'quark' on PATH" ;;
+	esac
+}
+
+# check <command>...: report missing commands; fail if any are missing.
+check() {
+	missing=0
+	for cmd in "$@"; do
+		if command -v "$cmd" >/dev/null 2>&1; then
+			echo "ok       $cmd"
+		else
+			echo "missing  $cmd — $(hint "$cmd")"
+			missing=1
+		fi
+	done
+	if [ ! -r "$config" ]; then
+		echo "missing  $config — run 'make install' from the quark-de repository"
+		missing=1
+	fi
+	return "$missing"
+}
+
+case "${1:-}" in
+-h | --help)
+	usage
+	exit 0
+	;;
+--check | doctor)
+	check sway quark foot firefox
+	exit
+	;;
+"") ;;
+*)
+	echo "quark-de: unknown argument '$1'" >&2
+	usage >&2
+	exit 2
+	;;
+esac
+
+if ! check sway quark >&2; then
+	echo "quark-de: fix the missing dependencies above, then log in again. 'quark-de --check' lists them all." >&2
+	exit 1
+fi
+
+exec sway --config "$config"

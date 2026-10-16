@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Quark
+Comment=Quark as your desktop, with a browser and terminal on the side
+Exec=quark-de
+Type=Application
+DesktopNames=quark-de

@@ -1,0 +1,33 @@
+# Quark DE: Quark is the desktop. A browser and a terminal live on side workspaces.
+
+set $mod Mod4
+set $quark 1:quark
+set $browser 2:browser
+set $terminal 3:terminal
+
+# No bar, no decorations: Quark draws the whole screen.
+default_border none
+default_floating_border none
+gaps inner 0
+gaps outer 0
+
+# App IDs: Quark's Flutter APPLICATION_ID (quark/linux/CMakeLists.txt), firefox, foot.
+assign [app_id="org.autobutler.quark"] workspace $quark
+assign [app_id="firefox"] workspace $browser
+assign [app_id="foot"] workspace $terminal
+for_window [app_id="org.autobutler.quark"] fullscreen enable
+
+# ponytail: plain respawn loop; Quark crashing would otherwise leave an empty desktop.
+exec sh -c 'while :; do quark; sleep 1; done'
+exec firefox
+exec foot
+
+# The first workspace bound below is the one sway starts on.
+bindsym $mod+1 workspace $quark
+bindsym $mod+2 workspace $browser
+bindsym $mod+3 workspace $terminal
+bindsym $mod+Tab workspace $quark
+bindsym $mod+Shift+e exec swaynag -t warning -m 'Log out of Quark?' -B 'Log out' 'swaymsg exit'
+
+# Distro snippets (systemd/D-Bus environment, xdg-desktop-portal for file dialogs).
+include /etc/sway/config.d/*
