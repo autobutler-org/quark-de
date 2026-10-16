@@ -26,6 +26,8 @@ hint() {
 	cliphist) echo "sudo apt install cliphist (optional: clipboard history)" ;;
 	wofi) echo "sudo apt install wofi (optional: Super+V clipboard picker)" ;;
 	mako) echo "sudo apt install mako-notifier (no notifications without it)" ;;
+	grim | slurp) echo "sudo apt install $1 (screenshot keys stay dead without it)" ;;
+	wl-copy) echo "sudo apt install wl-clipboard (screenshots are saved but not copied without it)" ;;
 	quark) echo "install the Quark Linux app from https://github.com/autobutler-org/quark/releases and put 'quark' on PATH" ;;
 	wpctl) echo "sudo apt install wireplumber (volume keys stay dead without it)" ;;
 	brightnessctl) echo "sudo apt install brightnessctl (brightness keys stay dead without it)" ;;
@@ -35,7 +37,7 @@ hint() {
 }
 
 warn_optional() {
-	for cmd in mako wpctl brightnessctl playerctl notify-send wl-paste cliphist wofi; do
+	for cmd in mako wpctl brightnessctl playerctl notify-send wl-paste cliphist wofi grim slurp wl-copy; do
 		if command -v "$cmd" >/dev/null 2>&1; then
 			echo "ok       $cmd"
 		else

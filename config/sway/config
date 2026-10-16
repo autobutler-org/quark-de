@@ -44,6 +44,9 @@ bindsym $mod+v exec quark-de-clipboard pick
 bindsym $mod+n exec makoctl dismiss
 bindsym $mod+Shift+n exec makoctl restore
 bindsym $mod+d exec quark-de-dnd
+bindsym Print exec quark-de-screenshot full
+bindsym Shift+Print exec quark-de-screenshot region
+bindsym $mod+Print exec quark-de-screenshot window
 bindsym $mod+Shift+e exec swaynag -t warning -m 'Log out of Quark?' -B 'Log out' 'swaymsg exit'
 
 bindsym --locked XF86AudioRaiseVolume exec quark-de-osd volume-up

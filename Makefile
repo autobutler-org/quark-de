@@ -10,7 +10,7 @@ help:
 	@echo "make install    install the session (PREFIX=$(PREFIX), DESTDIR supported)"
 	@echo "make uninstall  remove it"
 	@echo "make check      lint (shellcheck, shfmt, desktop-file-validate, actionlint) and run the unit tests"
-	@echo "make test       run the headless sway tests (needs sway, foot, jq, wl-clipboard, cliphist, mako, libnotify-bin)"
+	@echo "make test       run the headless sway tests (needs sway, foot, jq, wl-clipboard, cliphist, mako, libnotify-bin, grim)"
 
 install:
 	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/share/quark-de/sway $(DESTDIR)$(PREFIX)/share/quark-de/mako $(DESTDIR)$(PREFIX)/share/xdg-desktop-portal $(DESTDIR)$(WAYLAND_SESSIONS)
@@ -44,5 +44,5 @@ check:
 	sh tests/run.sh tests/unit
 
 test:
-	@for cmd in sway foot jq wl-copy cliphist mako notify-send dbus-daemon; do command -v $$cmd >/dev/null || { echo "$$cmd not found: sudo apt install sway foot jq wl-clipboard cliphist mako-notifier libnotify-bin dbus"; exit 1; }; done
+	@for cmd in sway foot jq wl-copy cliphist mako notify-send dbus-daemon grim; do command -v $$cmd >/dev/null || { echo "$$cmd not found: sudo apt install sway foot jq wl-clipboard cliphist mako-notifier libnotify-bin dbus grim"; exit 1; }; done
 	sh tests/run.sh tests/sway
