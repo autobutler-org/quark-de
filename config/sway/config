@@ -28,6 +28,7 @@ exec firefox
 exec foot
 exec quark-de-hint --first-login
 exec swayidle -w timeout 300 'swaylock -f' timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' before-sleep 'swaylock -f'
+exec wl-paste --watch quark-de-clipboard store
 
 # The first workspace bound below is the one sway starts on.
 bindsym $mod+1 workspace $quark
@@ -37,6 +38,7 @@ bindsym $mod+Tab workspace $quark
 bindsym $mod+slash exec quark-de-hint
 bindsym $mod+F1 exec quark-de-hint
 bindsym $mod+l exec swaylock -f
+bindsym $mod+v exec quark-de-clipboard pick
 bindsym $mod+Shift+e exec swaynag -t warning -m 'Log out of Quark?' -B 'Log out' 'swaymsg exit'
 
 bindsym --locked XF86AudioRaiseVolume exec quark-de-osd volume-up

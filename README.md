@@ -37,6 +37,7 @@ out. Quark's output is appended to `${XDG_STATE_HOME:-~/.local/state}/quark-de/q
 | `Super+/`       | show these keys                |
 | `Super+F1`      | show these keys                |
 | `Super+L`       | lock the screen                |
+| `Super+V`       | clipboard history (last 20)    |
 | `Super+Shift+E` | log out                        |
 
 Opening a link from Quark switches to the browser; `Super+Tab` takes you back.
@@ -55,6 +56,18 @@ close lock before sleeping. A fullscreen browser or other app (a video, say) kee
 does not, because it is always fullscreen. Without `swayidle` or `swaylock` the session still starts, just without
 locking.
 
+## Clipboard
+
+Everything you copy is kept in a [cliphist](https://github.com/sentriz/cliphist) history. On Wayland the clipboard
+empties when the app you copied from closes; the copy is still in the history. `Super+V` lists the last 20 items in
+[wofi](https://hg.sr.ht/~scoopta/wofi); pick one and it is back on the clipboard, ready to paste.
+
+Copies a password manager marks with `x-kde-passwordManagerHint` (KeePassXC does) are not stored.
+
+- `cliphist wipe` clears the history.
+- To turn history off, delete the `exec wl-paste --watch quark-de-clipboard store` line from the installed sway config
+  (`$PREFIX/share/quark-de/sway/config`) and log in again.
+
 ## Install
 
 Dependencies: `sway`, `foot`, `firefox`, `swayidle`, `swaylock`, and the Quark Linux app (`quark` on `PATH`, from the
@@ -66,9 +79,12 @@ Optional, for the media and brightness keys: `wpctl` (from `wireplumber`), `brig
 `notify-send` (from `libnotify-bin`) for the on-screen level. The session starts without them and warns about each
 one that is missing.
 
+Optional: `wl-clipboard` and `cliphist` for clipboard history, `wofi` for the `Super+V` picker.
+
 ```bash
 sudo apt install sway foot firefox swayidle swaylock xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
 sudo apt install wireplumber brightnessctl playerctl libnotify-bin   # optional
+sudo apt install wl-clipboard cliphist wofi   # optional: clipboard history
 sudo make install          # PREFIX=/usr/local by default; DESTDIR is honored
 quark-de --check           # lists anything still missing and how to get it
 ```
@@ -96,7 +112,7 @@ binding (`quark-de-focus <workspace> <app_id> <command>`) in `config/sway/config
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). `make check` lints (needs `shellcheck`, `shfmt`, `desktop-file-validate` and
 `actionlint`; it says how to get any that are missing) and runs the unit tests; `make test` runs the headless sway tests
-(needs `sway`, `foot` and `jq`).
+(needs `sway`, `foot`, `jq`, `wl-clipboard` and `cliphist`).
 
 ## License
 

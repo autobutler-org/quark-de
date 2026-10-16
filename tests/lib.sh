@@ -33,6 +33,7 @@ stub() {
 
 harness_teardown() {
 	if [ -n "${sway_pid:-}" ]; then
+		pkill -TERM -P "$sway_pid" 2>/dev/null || :
 		kill "$sway_pid" 2>/dev/null || :
 		wait "$sway_pid" 2>/dev/null || :
 	fi
@@ -42,7 +43,7 @@ harness_teardown() {
 sway_env() {
 	env PATH="$tmp/shim:$tmp/usr/bin:$PATH" \
 		WLR_BACKENDS=headless WLR_LIBINPUT_NO_DEVICES=1 WLR_RENDERER=pixman \
-		XDG_RUNTIME_DIR="$runtime" XDG_STATE_HOME="$tmp/state" "$@"
+		XDG_RUNTIME_DIR="$runtime" XDG_STATE_HOME="$tmp/state" XDG_CACHE_HOME="$tmp/cache" "$@"
 }
 
 sway_start() {
