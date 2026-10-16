@@ -44,6 +44,10 @@ Opening a link from Quark switches to the browser; `Super+Tab` takes you back.
 On your first login a bar at the top of the screen lists these keys. It shows once: a marker in
 `${XDG_STATE_HOME:-~/.local/state}/quark-de/` remembers that you have seen it.
 
+The volume, mic mute, brightness and play/pause/next/previous keys work on every workspace, even while the screen is
+locked. Volume and brightness changes show the new level as a notification, so a notification daemon (such as
+`mako`) has to be running to see it. The power key is left to systemd-logind, which by default powers off.
+
 ## Lock and idle
 
 After 5 minutes idle the screen locks (swaylock); after 10 it turns off and wakes on input. Suspend and lid
@@ -56,8 +60,13 @@ locking.
 Dependencies: `sway`, `foot`, `firefox`, `swayidle`, `swaylock`, and the Quark Linux app (`quark` on `PATH`, from the
 [Quark releases](https://github.com/autobutler-org/quark/releases)).
 
+Optional, for the media and brightness keys: `wpctl` (from `wireplumber`), `brightnessctl`, `playerctl`, and
+`notify-send` (from `libnotify-bin`) for the on-screen level. The session starts without them and warns about each
+one that is missing.
+
 ```bash
 sudo apt install sway foot firefox swayidle swaylock
+sudo apt install wireplumber brightnessctl playerctl libnotify-bin   # optional
 sudo make install          # PREFIX=/usr/local by default; DESTDIR is honored
 quark-de --check           # lists anything still missing and how to get it
 ```

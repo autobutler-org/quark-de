@@ -23,7 +23,21 @@ hint() {
 	case "$1" in
 	sway | foot | firefox | swayidle | swaylock) echo "sudo apt install $1" ;;
 	quark) echo "install the Quark Linux app from https://github.com/autobutler-org/quark/releases and put 'quark' on PATH" ;;
+	wpctl) echo "sudo apt install wireplumber (volume keys stay dead without it)" ;;
+	brightnessctl) echo "sudo apt install brightnessctl (brightness keys stay dead without it)" ;;
+	playerctl) echo "sudo apt install playerctl (play, pause, next and previous keys stay dead without it)" ;;
+	notify-send) echo "sudo apt install libnotify-bin (keys work, but no on-screen level)" ;;
 	esac
+}
+
+warn_optional() {
+	for cmd in wpctl brightnessctl playerctl notify-send; do
+		if command -v "$cmd" >/dev/null 2>&1; then
+			echo "ok       $cmd"
+		else
+			echo "warning  $cmd — $(hint "$cmd")"
+		fi
+	done
 }
 
 # check <command>...: report missing commands; fail if any are missing.
@@ -69,6 +83,7 @@ case "${1:-}" in
 	exit 0
 	;;
 --check | doctor)
+	warn_optional
 	check sway quark foot firefox swayidle swaylock
 	exit
 	;;
@@ -88,6 +103,7 @@ if ! command -v sway >/dev/null 2>&1; then
 	log "error: sway is missing — $(hint sway), then log in again. 'quark-de --check' lists everything missing."
 	exit 1
 fi
+warn_optional | grep '^warning' >&2 || :
 
 if ! command -v quark >/dev/null 2>&1; then
 	need_file "$fallback"
