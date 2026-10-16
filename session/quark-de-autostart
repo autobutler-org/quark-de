@@ -1,0 +1,65 @@
+#!/bin/sh
+set -u
+
+readonly target=xdg-desktop-autostart.target
+readonly user_dir="${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
+
+notify() {
+	echo "quark-de-autostart: $1" >&2
+	if command -v notify-send >/dev/null 2>&1; then
+		notify-send -u critical -a Quark "Startup apps" "$1"
+	fi
+}
+
+user_entries() {
+	for entry in "$user_dir"/*.desktop; do
+		[ -e "$entry" ] && return 0
+	done
+	return 1
+}
+
+start_systemd() {
+	vars=
+	for name in XDG_CURRENT_DESKTOP WAYLAND_DISPLAY DISPLAY SWAYSOCK; do
+		eval "[ -n \"\${$name:-}\" ]" && vars="$vars $name"
+	done
+	if [ -n "$vars" ]; then
+		# shellcheck disable=SC2086
+		systemctl --user import-environment $vars
+	fi
+	systemctl --user daemon-reload
+	if ! systemctl --user start "$target"; then
+		notify "Your startup apps did not start. Run 'systemctl --user status $target' to see why."
+		return 1
+	fi
+	failed=
+	while read -r unit _; do
+		[ -n "$unit" ] && failed="$failed $unit"
+	done <<FAILED
+$(systemctl --user list-units --failed --plain --no-legend 'app-*@autostart.service')
+FAILED
+	if [ -n "$failed" ]; then
+		notify "These startup apps failed:$failed. Run 'systemctl --user status <app>' to see why."
+		return 1
+	fi
+}
+
+start_dex() {
+	if [ -n "${XDG_CURRENT_DESKTOP:-}" ]; then
+		dex -a -e "${XDG_CURRENT_DESKTOP%%:*}"
+	else
+		dex -a
+	fi || {
+		notify "Some startup apps did not start. Run 'dex -a -v' in a terminal to see why."
+		return 1
+	}
+}
+
+if systemctl --user cat "$target" >/dev/null 2>&1; then
+	start_systemd
+elif command -v dex >/dev/null 2>&1; then
+	start_dex
+elif user_entries; then
+	notify "Your startup apps in $user_dir were not started. Install dex (sudo apt install dex) or run a systemd user session, then log in again."
+	exit 1
+fi

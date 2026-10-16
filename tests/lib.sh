@@ -16,6 +16,7 @@ harness_setup() {
 	stub quark 'exec foot --app-id=org.autobutler.quark'
 	stub firefox 'exec foot --app-id=firefox'
 	stub swaynag "printf '%s\\n' \"\$@\" >>\"$tmp/swaynag.args\""
+	stub quark-de-autostart ": >'$tmp/autostart.ran'"
 	trap harness_teardown EXIT
 }
 
