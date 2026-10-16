@@ -55,7 +55,8 @@ Using a different browser? Change the `exec firefox` line and its `assign [app_i
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). `make check` lints the launcher.
+See [CONTRIBUTING.md](CONTRIBUTING.md). `make check` lints the shell scripts and runs the unit tests; `make test` runs
+the headless sway tests (needs `sway`, `foot` and `jq`).
 
 ## License
 

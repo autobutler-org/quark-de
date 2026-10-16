@@ -1,12 +1,15 @@
 PREFIX ?= /usr/local
 WAYLAND_SESSIONS ?= /usr/share/wayland-sessions
 
-.PHONY: help install uninstall check
+.PHONY: help install uninstall check test
+
+SHELL_FILES = session/quark-de $(wildcard session/quark-de-*) $(wildcard tests/*.sh tests/*/*.sh)
 
 help:
 	@echo "make install    install the session (PREFIX=$(PREFIX), DESTDIR supported)"
 	@echo "make uninstall  remove it"
-	@echo "make check      lint the launcher with shellcheck"
+	@echo "make check      lint the shell scripts with shellcheck and run the unit tests"
+	@echo "make test       run the headless sway tests (needs sway, foot, jq)"
 
 install:
 	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/share/quark-de/sway $(DESTDIR)$(WAYLAND_SESSIONS)
@@ -20,4 +23,9 @@ uninstall:
 
 check:
 	@command -v shellcheck >/dev/null || { echo "shellcheck not found: sudo apt install shellcheck (or brew install shellcheck)"; exit 1; }
-	shellcheck session/quark-de
+	shellcheck -x $(SHELL_FILES)
+	sh tests/run.sh tests/unit
+
+test:
+	@for cmd in sway foot jq; do command -v $$cmd >/dev/null || { echo "$$cmd not found: sudo apt install sway foot jq"; exit 1; }; done
+	sh tests/run.sh tests/sway
