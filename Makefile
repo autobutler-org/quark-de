@@ -9,7 +9,7 @@ SHELL_FILES = session/quark-de $(HELPERS) $(wildcard tests/*.sh tests/*/*.sh)
 help:
 	@echo "make install    install the session (PREFIX=$(PREFIX), DESTDIR supported)"
 	@echo "make uninstall  remove it"
-	@echo "make check      lint the shell scripts with shellcheck and run the unit tests"
+	@echo "make check      lint (shellcheck, shfmt, desktop-file-validate, actionlint) and run the unit tests"
 	@echo "make test       run the headless sway tests (needs sway, foot, jq)"
 
 install:
@@ -25,8 +25,20 @@ uninstall:
 	rm -rf $(DESTDIR)$(PREFIX)/share/quark-de
 
 check:
-	@command -v shellcheck >/dev/null || { echo "shellcheck not found: sudo apt install shellcheck (or brew install shellcheck)"; exit 1; }
+	@missing=0; for cmd in shellcheck shfmt desktop-file-validate actionlint; do \
+		command -v $$cmd >/dev/null && continue; \
+		case $$cmd in \
+		shellcheck | shfmt) hint="sudo apt install $$cmd (or brew install $$cmd)" ;; \
+		desktop-file-validate) hint="sudo apt install desktop-file-utils (or brew install desktop-file-utils)" ;; \
+		actionlint) hint="go install github.com/rhysd/actionlint/cmd/actionlint@latest (or brew install actionlint)" ;; \
+		esac; \
+		echo "$$cmd not found: $$hint"; missing=1; \
+	done; exit $$missing
 	shellcheck -x $(SHELL_FILES)
+	shfmt -d $(SHELL_FILES)
+	@tmp="$$(mktemp -d)" && grep -v '^DesktopNames=' session/quark-de.desktop >"$$tmp/quark-de.desktop" && \
+		{ desktop-file-validate "$$tmp/quark-de.desktop"; status=$$?; rm -rf "$$tmp"; exit $$status; }
+	actionlint
 	sh tests/run.sh tests/unit
 
 test:

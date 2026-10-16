@@ -4,7 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
-  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -12,8 +15,34 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SHELLCHECK_VERSION: 0.11.0
+      SHELLCHECK_SHA256: 8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198
+      SHFMT_VERSION: 3.12.0
+      SHFMT_SHA256: d9fbb2a9c33d13f47e7618cf362a914d029d02a6df124064fff04fd688a745ea
+      ACTIONLINT_VERSION: 1.7.7
+      ACTIONLINT_SHA256: 023070a287cd8cccd71515fedc843f1985bf96c436b7effaecce67290e7e0757
     steps:
       - uses: actions/checkout@v7
+      - name: Install pinned linters
+        run: |
+          bin="$RUNNER_TEMP/bin"
+          mkdir -p "$bin"
+          cd "$RUNNER_TEMP"
+          curl -fsSLo shellcheck.tar.xz "https://github.com/koalaman/shellcheck/releases/download/v${SHELLCHECK_VERSION}/shellcheck-v${SHELLCHECK_VERSION}.linux.x86_64.tar.xz"
+          curl -fsSLo shfmt "https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64"
+          curl -fsSLo actionlint.tar.gz "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          sha256sum -c - <<EOF
+          ${SHELLCHECK_SHA256}  shellcheck.tar.xz
+          ${SHFMT_SHA256}  shfmt
+          ${ACTIONLINT_SHA256}  actionlint.tar.gz
+          EOF
+          tar -xJf shellcheck.tar.xz --strip-components=1 -C "$bin" "shellcheck-v${SHELLCHECK_VERSION}/shellcheck"
+          tar -xzf actionlint.tar.gz -C "$bin" actionlint
+          install -m755 shfmt "$bin/shfmt"
+          echo "$bin" >>"$GITHUB_PATH"
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends desktop-file-utils
       - run: make check
 
   test:
