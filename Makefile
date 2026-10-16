@@ -10,13 +10,14 @@ help:
 	@echo "make install    install the session (PREFIX=$(PREFIX), DESTDIR supported)"
 	@echo "make uninstall  remove it"
 	@echo "make check      lint (shellcheck, shfmt, desktop-file-validate, actionlint) and run the unit tests"
-	@echo "make test       run the headless sway tests (needs sway, foot, jq, wl-clipboard, cliphist)"
+	@echo "make test       run the headless sway tests (needs sway, foot, jq, wl-clipboard, cliphist, mako, libnotify-bin)"
 
 install:
-	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/share/quark-de/sway $(DESTDIR)$(PREFIX)/share/xdg-desktop-portal $(DESTDIR)$(WAYLAND_SESSIONS)
+	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/share/quark-de/sway $(DESTDIR)$(PREFIX)/share/quark-de/mako $(DESTDIR)$(PREFIX)/share/xdg-desktop-portal $(DESTDIR)$(WAYLAND_SESSIONS)
 	install -m755 session/quark-de $(DESTDIR)$(PREFIX)/bin/quark-de
 	install -m755 $(HELPERS) $(DESTDIR)$(PREFIX)/bin/
-	install -m644 config/sway/config $(DESTDIR)$(PREFIX)/share/quark-de/sway/config
+	sed 's|^set $$share .*|set $$share $(PREFIX)/share/quark-de|' config/sway/config > $(DESTDIR)$(PREFIX)/share/quark-de/sway/config
+	install -m644 config/mako/config $(DESTDIR)$(PREFIX)/share/quark-de/mako/config
 	install -m644 config/sway/fallback $(DESTDIR)$(PREFIX)/share/quark-de/sway/fallback
 	install -m644 config/xdg-desktop-portal/quark-portals.conf $(DESTDIR)$(PREFIX)/share/xdg-desktop-portal/quark-portals.conf
 	sed 's|^Exec=.*|Exec=$(PREFIX)/bin/quark-de|' session/quark-de.desktop > $(DESTDIR)$(WAYLAND_SESSIONS)/quark-de.desktop
@@ -43,5 +44,5 @@ check:
 	sh tests/run.sh tests/unit
 
 test:
-	@for cmd in sway foot jq wl-copy cliphist; do command -v $$cmd >/dev/null || { echo "$$cmd not found: sudo apt install sway foot jq wl-clipboard cliphist"; exit 1; }; done
+	@for cmd in sway foot jq wl-copy cliphist mako notify-send dbus-daemon; do command -v $$cmd >/dev/null || { echo "$$cmd not found: sudo apt install sway foot jq wl-clipboard cliphist mako-notifier libnotify-bin dbus"; exit 1; }; done
 	sh tests/run.sh tests/sway

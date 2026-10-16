@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+readonly mode=do-not-disturb
+
+if makoctl mode | grep -qx "$mode"; then
+	makoctl mode -r "$mode" >/dev/null
+else
+	makoctl mode -a "$mode" >/dev/null
+fi
