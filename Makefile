@@ -10,7 +10,7 @@ help:
 	@echo "make install    install the session (PREFIX=$(PREFIX), DESTDIR supported)"
 	@echo "make uninstall  remove it"
 	@echo "make check      lint (shellcheck, shfmt, desktop-file-validate, actionlint) and run the unit tests"
-	@echo "make test       run the headless sway tests (needs sway, foot, jq)"
+	@echo "make test       run the headless sway tests (needs sway, foot, jq, wl-clipboard, cliphist)"
 
 install:
 	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/share/quark-de/sway $(DESTDIR)$(PREFIX)/share/xdg-desktop-portal $(DESTDIR)$(WAYLAND_SESSIONS)
@@ -43,5 +43,5 @@ check:
 	sh tests/run.sh tests/unit
 
 test:
-	@for cmd in sway foot jq; do command -v $$cmd >/dev/null || { echo "$$cmd not found: sudo apt install sway foot jq"; exit 1; }; done
+	@for cmd in sway foot jq wl-copy cliphist; do command -v $$cmd >/dev/null || { echo "$$cmd not found: sudo apt install sway foot jq wl-clipboard cliphist"; exit 1; }; done
 	sh tests/run.sh tests/sway

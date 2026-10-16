@@ -1,0 +1,42 @@
+#!/bin/sh
+set -eu
+
+readonly password_hint=x-kde-passwordManagerHint
+readonly picker_items=20
+
+usage() {
+	cat <<USAGE
+Usage: quark-de-clipboard store | pick
+
+  store   save the clipboard on stdin to the cliphist history, unless a
+          password manager marked it ($password_hint)
+  pick    choose one of the last $picker_items clipboard items with wofi and copy it
+USAGE
+}
+
+store() {
+	if wl-paste --list-types 2>/dev/null | grep -qx "$password_hint"; then
+		cat >/dev/null
+		exit 0
+	fi
+	exec cliphist store
+}
+
+pick() {
+	if ! command -v wofi >/dev/null 2>&1; then
+		swaynag -t warning -m 'The clipboard picker needs wofi: sudo apt install wofi'
+		exit 1
+	fi
+	choice="$(cliphist list | head -n "$picker_items" | wofi --dmenu --prompt clipboard)" || exit 0
+	printf '%s\n' "$choice" | cliphist decode | wl-copy
+}
+
+case "${1:-}" in
+store) store ;;
+pick) pick ;;
+-h | --help) usage ;;
+*)
+	usage >&2
+	exit 2
+	;;
+esac
