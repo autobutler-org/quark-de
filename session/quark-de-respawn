@@ -1,0 +1,49 @@
+#!/bin/sh
+set -u
+
+readonly threshold=3
+readonly window=30
+readonly workspace="${1:?usage: quark-de-respawn <workspace>, e.g. quark-de-respawn 1:quark}"
+readonly state="${XDG_STATE_HOME:-$HOME/.local/state}/quark-de"
+readonly log="$state/quark.log"
+readonly retry="$state/retry"
+
+nag() {
+	rm -f "$retry"
+	swaynag -t error -m 'Quark keeps crashing.' \
+		-B 'Open terminal' 'foot --app-id=quark-de-rescue' \
+		-B 'View log' "foot --app-id=quark-de-rescue less +G '$log'" \
+		-Z 'Retry' "touch '$retry'" \
+		-Z 'Log out' 'swaymsg exit'
+	[ -e "$retry" ] && rm -f "$retry"
+}
+
+mkdir -p "$state" || {
+	echo "quark-de-respawn: cannot create $state; check its permissions, then log in again" >&2
+	exit 1
+}
+
+exits=""
+restart=0
+while :; do
+	[ "$restart" = 1 ] && swaymsg workspace "$workspace" >/dev/null 2>&1
+	restart=1
+	quark >>"$log" 2>&1
+	status=$?
+	now=$(date +%s)
+	echo "quark-de: quark exited with status $status at $(date)" >>"$log"
+	recent="$now"
+	count=1
+	for t in $exits; do
+		if [ $((now - t)) -lt "$window" ]; then
+			recent="$recent $t"
+			count=$((count + 1))
+		fi
+	done
+	exits="$recent"
+	if [ "$count" -ge "$threshold" ]; then
+		nag || exit 0
+		exits=""
+	fi
+	sleep 1
+done

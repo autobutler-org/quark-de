@@ -20,8 +20,8 @@ focus_on_window_activation focus
 for_window [app_id="^(?!org\.autobutler\.quark$)"] inhibit_idle fullscreen
 for_window [shell="xwayland"] inhibit_idle fullscreen
 
-# ponytail: plain respawn loop; Quark crashing would otherwise leave an empty desktop.
-exec sh -c 'while :; do quark; sleep 1; done'
+# Respawn Quark; after repeated crashes, say so instead of leaving an empty desktop.
+exec quark-de-respawn $quark
 exec firefox
 exec foot
 exec quark-de-hint --first-login
