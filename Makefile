@@ -14,11 +14,12 @@ help:
 install:
 	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/share/quark-de/sway $(DESTDIR)$(WAYLAND_SESSIONS)
 	install -m755 session/quark-de $(DESTDIR)$(PREFIX)/bin/quark-de
+	install -m755 session/quark-de-focus $(DESTDIR)$(PREFIX)/bin/quark-de-focus
 	install -m644 config/sway/config $(DESTDIR)$(PREFIX)/share/quark-de/sway/config
 	sed 's|^Exec=.*|Exec=$(PREFIX)/bin/quark-de|' session/quark-de.desktop > $(DESTDIR)$(WAYLAND_SESSIONS)/quark-de.desktop
 
 uninstall:
-	rm -f $(DESTDIR)$(PREFIX)/bin/quark-de $(DESTDIR)$(WAYLAND_SESSIONS)/quark-de.desktop
+	rm -f $(DESTDIR)$(PREFIX)/bin/quark-de $(DESTDIR)$(PREFIX)/bin/quark-de-focus $(DESTDIR)$(WAYLAND_SESSIONS)/quark-de.desktop
 	rm -rf $(DESTDIR)$(PREFIX)/share/quark-de
 
 check:

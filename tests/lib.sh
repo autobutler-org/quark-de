@@ -62,3 +62,24 @@ wait_for() {
 views_up() {
 	[ "$(swaymsg_ -t get_tree | jq '[.. | objects | select(.app_id? != null)] | length')" -ge "$1" ]
 }
+
+app_views_is() {
+	[ "$(swaymsg_ -t get_tree | jq --arg id "$1" '[.. | objects | select(.app_id? == $id)] | length')" -eq "$2" ]
+}
+
+app_on_workspace() {
+	swaymsg_ -t get_tree | jq -e --arg id "$1" --arg ws "$2" \
+		'[.. | objects | select(.type? == "workspace" and .name == $ws) | .. | objects | select(.app_id? == $id)] | length > 0' >/dev/null
+}
+
+app_kill() {
+	swaymsg_ -t get_tree | jq -r --arg id "$1" '.. | objects | select(.app_id? == $id) | .pid' | xargs kill
+}
+
+binding_run() {
+	swaymsg_ "$(sed -n "s/^bindsym \$mod+$1 //p" "$config")" >/dev/null
+}
+
+focused_workspace() {
+	swaymsg_ -t get_workspaces | jq -r '.[] | select(.focused) | .name'
+}
