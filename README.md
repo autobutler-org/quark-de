@@ -58,14 +58,16 @@ locking.
 ## Install
 
 Dependencies: `sway`, `foot`, `firefox`, `swayidle`, `swaylock`, and the Quark Linux app (`quark` on `PATH`, from the
-[Quark releases](https://github.com/autobutler-org/quark/releases)).
+[Quark releases](https://github.com/autobutler-org/quark/releases)). File dialogs and screen sharing also need
+`xdg-desktop-portal`, `xdg-desktop-portal-wlr` and `xdg-desktop-portal-gtk`; `quark-de --check` warns if they are
+missing.
 
 Optional, for the media and brightness keys: `wpctl` (from `wireplumber`), `brightnessctl`, `playerctl`, and
 `notify-send` (from `libnotify-bin`) for the on-screen level. The session starts without them and warns about each
 one that is missing.
 
 ```bash
-sudo apt install sway foot firefox swayidle swaylock
+sudo apt install sway foot firefox swayidle swaylock xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
 sudo apt install wireplumber brightnessctl playerctl libnotify-bin   # optional
 sudo make install          # PREFIX=/usr/local by default; DESTDIR is honored
 quark-de --check           # lists anything still missing and how to get it
@@ -77,6 +79,10 @@ If the session can't start, it says why in `~/.local/state/quark-de/session.log`
 the journal (`journalctl -t quark-de`). Without `sway` you land back at the login screen. Without `quark` you get a
 fallback session instead: an error bar saying what to install, a Log out button, and a foot terminal. A missing
 `foot` or `firefox` is logged as a warning and the session starts anyway.
+
+The session sets `XDG_CURRENT_DESKTOP=Quark:sway`, and `make install` puts `quark-portals.conf` in
+`$PREFIX/share/xdg-desktop-portal/`: screen sharing and screenshots go to the wlr portal, everything else (file
+pickers, settings) to the gtk one.
 
 Using a different browser? Change the `exec firefox` line, its `assign [app_id="firefox"]` rule and the `$mod+2`
 binding (`quark-de-focus <workspace> <app_id> <command>`) in `config/sway/config` to match (`swaymsg -t get_tree | grep app_id` shows the app ID).
