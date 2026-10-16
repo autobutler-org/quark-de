@@ -32,6 +32,7 @@ Under the hood it's [sway](https://swaywm.org) with a short config and a launche
 | `Super+Tab`     | back to Quark                  |
 | `Super+/`       | show these keys                |
 | `Super+F1`      | show these keys                |
+| `Super+L`       | lock the screen                |
 | `Super+Shift+E` | log out                        |
 
 Opening a link from Quark switches to the browser; `Super+Tab` takes you back.
@@ -39,13 +40,20 @@ Opening a link from Quark switches to the browser; `Super+Tab` takes you back.
 On your first login a bar at the top of the screen lists these keys. It shows once: a marker in
 `${XDG_STATE_HOME:-~/.local/state}/quark-de/` remembers that you have seen it.
 
+## Lock and idle
+
+After 5 minutes idle the screen locks (swaylock); after 10 it turns off and wakes on input. Suspend and lid
+close lock before sleeping. A fullscreen browser or other app (a video, say) keeps the screen on; Quark itself
+does not, because it is always fullscreen. Without `swayidle` or `swaylock` the session still starts, just without
+locking.
+
 ## Install
 
-Dependencies: `sway`, `foot`, `firefox`, and the Quark Linux app (`quark` on `PATH`, from the
+Dependencies: `sway`, `foot`, `firefox`, `swayidle`, `swaylock`, and the Quark Linux app (`quark` on `PATH`, from the
 [Quark releases](https://github.com/autobutler-org/quark/releases)).
 
 ```bash
-sudo apt install sway foot firefox
+sudo apt install sway foot firefox swayidle swaylock
 sudo make install          # PREFIX=/usr/local by default; DESTDIR is honored
 quark-de --check           # lists anything still missing and how to get it
 ```

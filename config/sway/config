@@ -17,12 +17,15 @@ assign [app_id="firefox"] workspace $browser
 assign [app_id="foot"] workspace $terminal
 for_window [app_id="org.autobutler.quark"] fullscreen enable
 focus_on_window_activation focus
+for_window [app_id="^(?!org\.autobutler\.quark$)"] inhibit_idle fullscreen
+for_window [shell="xwayland"] inhibit_idle fullscreen
 
 # ponytail: plain respawn loop; Quark crashing would otherwise leave an empty desktop.
 exec sh -c 'while :; do quark; sleep 1; done'
 exec firefox
 exec foot
 exec quark-de-hint --first-login
+exec swayidle -w timeout 300 'swaylock -f' timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' before-sleep 'swaylock -f'
 
 # The first workspace bound below is the one sway starts on.
 bindsym $mod+1 workspace $quark
@@ -31,6 +34,7 @@ bindsym $mod+3 exec quark-de-focus $terminal foot foot
 bindsym $mod+Tab workspace $quark
 bindsym $mod+slash exec quark-de-hint
 bindsym $mod+F1 exec quark-de-hint
+bindsym $mod+l exec swaylock -f
 bindsym $mod+Shift+e exec swaynag -t warning -m 'Log out of Quark?' -B 'Log out' 'swaymsg exit'
 
 # Distro snippets (systemd/D-Bus environment, xdg-desktop-portal for file dialogs).
