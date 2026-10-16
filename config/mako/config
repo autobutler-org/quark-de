@@ -1,0 +1,20 @@
+layer=overlay
+anchor=top-right
+font=sans 12
+width=360
+padding=12
+margin=12
+border-size=2
+border-radius=6
+background-color=#1e1e1eee
+text-color=#f0f0f0
+border-color=#5aa9e6
+default-timeout=8000
+max-history=20
+
+[urgency=critical]
+border-color=#e06c75
+default-timeout=0
+
+[mode=do-not-disturb]
+invisible=1

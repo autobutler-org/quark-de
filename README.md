@@ -38,6 +38,9 @@ out. Quark's output is appended to `${XDG_STATE_HOME:-~/.local/state}/quark-de/q
 | `Super+F1`      | show these keys                |
 | `Super+L`       | lock the screen                |
 | `Super+V`       | clipboard history (last 20)    |
+| `Super+N`       | dismiss a notification         |
+| `Super+Shift+N` | bring back the last one        |
+| `Super+D`       | toggle do-not-disturb          |
 | `Super+Shift+E` | log out                        |
 
 Opening a link from Quark switches to the browser; `Super+Tab` takes you back.
@@ -68,9 +71,16 @@ Copies a password manager marks with `x-kde-passwordManagerHint` (KeePassXC does
 - To turn history off, delete the `exec wl-paste --watch quark-de-clipboard store` line from the installed sway config
   (`$PREFIX/share/quark-de/sway/config`) and log in again.
 
+## Notifications
+
+[mako](https://github.com/emersion/mako) shows notifications in the top-right corner, over Quark and on every
+workspace. Click one to dismiss it. Do-not-disturb hides them until you toggle it off. `Super+Shift+N` restores
+from a history of the last 20. The config is `config/mako/config`.
+
 ## Install
 
-Dependencies: `sway`, `foot`, `firefox`, `swayidle`, `swaylock`, and the Quark Linux app (`quark` on `PATH`, from the
+Dependencies: `sway`, `foot`, `firefox`, `swayidle`, `swaylock`, `mako` (notifications; the session starts without
+it), and the Quark Linux app (`quark` on `PATH`, from the
 [Quark releases](https://github.com/autobutler-org/quark/releases)). File dialogs and screen sharing also need
 `xdg-desktop-portal`, `xdg-desktop-portal-wlr` and `xdg-desktop-portal-gtk`; `quark-de --check` warns if they are
 missing.
@@ -82,7 +92,7 @@ one that is missing.
 Optional: `wl-clipboard` and `cliphist` for clipboard history, `wofi` for the `Super+V` picker.
 
 ```bash
-sudo apt install sway foot firefox swayidle swaylock xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
+sudo apt install sway foot firefox swayidle swaylock mako-notifier xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
 sudo apt install wireplumber brightnessctl playerctl libnotify-bin   # optional
 sudo apt install wl-clipboard cliphist wofi   # optional: clipboard history
 sudo make install          # PREFIX=/usr/local by default; DESTDIR is honored
@@ -112,7 +122,7 @@ binding (`quark-de-focus <workspace> <app_id> <command>`) in `config/sway/config
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). `make check` lints (needs `shellcheck`, `shfmt`, `desktop-file-validate` and
 `actionlint`; it says how to get any that are missing) and runs the unit tests; `make test` runs the headless sway tests
-(needs `sway`, `foot`, `jq`, `wl-clipboard` and `cliphist`).
+(needs `sway`, `foot`, `jq`, `wl-clipboard`, `cliphist`, `mako-notifier` and `libnotify-bin`).
 
 ## License
 

@@ -8,7 +8,7 @@ fail() {
 harness_setup() {
 	tmp="$(mktemp -d)"
 	repo="$(cd "$(dirname "$0")/../.." && pwd)"
-	make -s -C "$repo" install DESTDIR="$tmp" PREFIX=/usr >/dev/null
+	make -s -C "$repo" install PREFIX="$tmp/usr" WAYLAND_SESSIONS="$tmp/wayland-sessions" >/dev/null
 	config="$tmp/usr/share/quark-de/sway/config"
 	runtime="$tmp/run"
 	mkdir -p "$runtime" "$tmp/shim"
@@ -37,7 +37,16 @@ harness_teardown() {
 		kill "$sway_pid" 2>/dev/null || :
 		wait "$sway_pid" 2>/dev/null || :
 	fi
+	if [ -n "${dbus_pid:-}" ]; then
+		kill "$dbus_pid" 2>/dev/null || :
+	fi
 	rm -rf "$tmp"
+}
+
+dbus_start() {
+	dbus_pid="$(dbus-daemon --session --fork --nopidfile --print-pid --address="unix:path=$runtime/bus")"
+	DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime/bus"
+	export DBUS_SESSION_BUS_ADDRESS
 }
 
 sway_env() {
