@@ -1,0 +1,8 @@
+set $mod Mod4
+
+exec sh -c 'swaynag -t error -m "$QUARK_DE_ERROR" -B "Log out" "swaymsg exit"'
+exec foot
+
+bindsym $mod+Shift+e exec swaynag -t warning -m 'Log out of Quark?' -B 'Log out' 'swaymsg exit'
+
+include /etc/sway/config.d/*

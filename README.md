@@ -64,6 +64,11 @@ quark-de --check           # lists anything still missing and how to get it
 
 Log out, pick **Quark** at the login screen. `sudo make uninstall` removes it.
 
+If the session can't start, it says why in `~/.local/state/quark-de/session.log` (`$XDG_STATE_HOME` if set) and in
+the journal (`journalctl -t quark-de`). Without `sway` you land back at the login screen. Without `quark` you get a
+fallback session instead: an error bar saying what to install, a Log out button, and a foot terminal. A missing
+`foot` or `firefox` is logged as a warning and the session starts anyway.
+
 Using a different browser? Change the `exec firefox` line, its `assign [app_id="firefox"]` rule and the `$mod+2`
 binding (`quark-de-focus <workspace> <app_id> <command>`) in `config/sway/config` to match (`swaymsg -t get_tree | grep app_id` shows the app ID).
 

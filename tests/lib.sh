@@ -84,3 +84,19 @@ binding_run() {
 focused_workspace() {
 	swaymsg_ -t get_workspaces | jq -r '.[] | select(.focused) | .name'
 }
+
+stub_bin() {
+	bin="$tmp/bin"
+	mkdir -p "$bin"
+	for tool in dirname mkdir date; do
+		ln -s "$(command -v "$tool")" "$bin/$tool"
+	done
+	for name in "$@"; do
+		printf '#!/bin/sh\necho "$*" >>"%s/%s.calls"\n' "$tmp" "$name" >"$bin/$name"
+		chmod +x "$bin/$name"
+	done
+}
+
+run_session() {
+	env -i HOME="$tmp/home" PATH="$bin" "$@" /bin/sh "$tmp/usr/bin/quark-de" >"$tmp/out.log" 2>&1
+}

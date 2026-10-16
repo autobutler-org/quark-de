@@ -17,6 +17,7 @@ install:
 	install -m755 session/quark-de $(DESTDIR)$(PREFIX)/bin/quark-de
 	install -m755 $(HELPERS) $(DESTDIR)$(PREFIX)/bin/
 	install -m644 config/sway/config $(DESTDIR)$(PREFIX)/share/quark-de/sway/config
+	install -m644 config/sway/fallback $(DESTDIR)$(PREFIX)/share/quark-de/sway/fallback
 	sed 's|^Exec=.*|Exec=$(PREFIX)/bin/quark-de|' session/quark-de.desktop > $(DESTDIR)$(WAYLAND_SESSIONS)/quark-de.desktop
 
 uninstall:
