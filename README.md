@@ -41,9 +41,16 @@ out. Quark's output is appended to `${XDG_STATE_HOME:-~/.local/state}/quark-de/q
 | `Super+N`       | dismiss a notification         |
 | `Super+Shift+N` | bring back the last one        |
 | `Super+D`       | toggle do-not-disturb          |
+| `Print`         | screenshot, full screen        |
+| `Shift+Print`   | screenshot, region             |
+| `Super+Print`   | screenshot, window             |
 | `Super+Shift+E` | log out                        |
 
 Opening a link from Quark switches to the browser; `Super+Tab` takes you back.
+
+Screenshots land in `~/Pictures/Screenshots` (your XDG Pictures folder, if you set one), named by date and time. Each
+one is also copied to the clipboard, and a notification shows where it was saved. `Shift+Print` lets you drag out a
+region; `Esc` cancels it.
 
 On your first login a bar at the top of the screen lists these keys. It shows once: a marker in
 `${XDG_STATE_HOME:-~/.local/state}/quark-de/` remembers that you have seen it.
@@ -91,10 +98,13 @@ one that is missing.
 
 Optional: `wl-clipboard` and `cliphist` for clipboard history, `wofi` for the `Super+V` picker.
 
+Optional, for screenshots: `grim`, `slurp`, and `wl-copy` (from `wl-clipboard`).
+
 ```bash
 sudo apt install sway foot firefox swayidle swaylock mako-notifier xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
 sudo apt install wireplumber brightnessctl playerctl libnotify-bin   # optional
 sudo apt install wl-clipboard cliphist wofi   # optional: clipboard history
+sudo apt install grim slurp wl-clipboard   # optional: screenshots
 sudo make install          # PREFIX=/usr/local by default; DESTDIR is honored
 quark-de --check           # lists anything still missing and how to get it
 ```
@@ -122,7 +132,7 @@ binding (`quark-de-focus <workspace> <app_id> <command>`) in `config/sway/config
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). `make check` lints (needs `shellcheck`, `shfmt`, `desktop-file-validate` and
 `actionlint`; it says how to get any that are missing) and runs the unit tests; `make test` runs the headless sway tests
-(needs `sway`, `foot`, `jq`, `wl-clipboard`, `cliphist`, `mako-notifier` and `libnotify-bin`).
+(needs `sway`, `foot`, `jq`, `wl-clipboard`, `cliphist`, `mako-notifier`, `libnotify-bin` and `grim`).
 
 ## License
 

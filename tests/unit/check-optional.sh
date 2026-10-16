@@ -21,9 +21,10 @@ ln -s "$(command -v dirname)" "$tmp/bin/dirname"
 
 PATH="$tmp/bin" /bin/sh "$tmp/usr/bin/quark-de" --check >"$tmp/out" 2>&1 ||
 	fail "quark-de --check failed when only optional tools are missing: $(cat "$tmp/out")"
-for cmd in wpctl brightnessctl playerctl notify-send; do
+for cmd in wpctl brightnessctl playerctl notify-send grim slurp wl-copy; do
 	grep -q "^warning  $cmd — " "$tmp/out" || fail "quark-de --check did not warn about $cmd: $(cat "$tmp/out")"
 done
+grep -q '^warning  wl-copy — sudo apt install wl-clipboard' "$tmp/out" || fail "quark-de --check does not say wl-copy comes from wl-clipboard: $(cat "$tmp/out")"
 
 rm "$tmp/bin/foot"
 if PATH="$tmp/bin" /bin/sh "$tmp/usr/bin/quark-de" --check >"$tmp/out" 2>&1; then

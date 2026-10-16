@@ -1,0 +1,74 @@
+#!/bin/sh
+set -eu
+
+usage() {
+	cat <<USAGE
+Usage: quark-de-screenshot full | region | window
+
+Save a screenshot to ~/Pictures/Screenshots (in your XDG Pictures folder, if set),
+copy it to the clipboard, and show a notification with its path.
+
+  full     the whole screen
+  region   a region you drag out with the mouse
+  window   the focused window
+USAGE
+}
+
+need() {
+	command -v "$1" >/dev/null 2>&1 && return 0
+	echo "quark-de-screenshot: $1 not found; install it with 'sudo apt install $2', then try again." >&2
+	exit 1
+}
+
+pictures_dir() {
+	dir="$(xdg-user-dir PICTURES 2>/dev/null || :)"
+	if [ -z "$dir" ] || [ "$dir" = "$HOME" ]; then
+		dir="$HOME/Pictures"
+	fi
+	echo "$dir"
+}
+
+focused_rect() {
+	swaymsg -t get_tree | jq -r '[.. | objects | select(.focused? == true)][0].rect | "\(.x),\(.y) \(.width)x\(.height)"'
+}
+
+case "${1:-}" in
+full) geometry="" ;;
+region)
+	need slurp slurp
+	geometry="$(slurp)" || exit 0
+	;;
+window)
+	need jq jq
+	geometry="$(focused_rect)"
+	;;
+-h | --help)
+	usage
+	exit 0
+	;;
+*)
+	usage >&2
+	exit 2
+	;;
+esac
+
+need grim grim
+
+dir="$(pictures_dir)/Screenshots"
+mkdir -p "$dir"
+file="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
+readonly file
+
+if [ -n "$geometry" ]; then
+	grim -g "$geometry" "$file"
+else
+	grim "$file"
+fi
+
+if command -v wl-copy >/dev/null 2>&1; then
+	wl-copy --type image/png <"$file" || :
+fi
+if command -v notify-send >/dev/null 2>&1; then
+	notify-send "Screenshot saved" "$file" || :
+fi
+echo "$file"
