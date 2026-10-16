@@ -24,13 +24,13 @@ Under the hood it's [sway](https://swaywm.org) with a short config and a launche
 
 `Super` is the Windows/Command key.
 
-| Keys            | Does                     |
-| --------------- | ------------------------ |
-| `Super+1`       | Quark                    |
-| `Super+2`       | browser                  |
-| `Super+3`       | terminal                 |
-| `Super+Tab`     | back to Quark            |
-| `Super+Shift+E` | log out                  |
+| Keys            | Does                           |
+| --------------- | ------------------------------ |
+| `Super+1`       | Quark                          |
+| `Super+2`       | browser (starts it if closed)  |
+| `Super+3`       | terminal (starts it if closed) |
+| `Super+Tab`     | back to Quark                  |
+| `Super+Shift+E` | log out                        |
 
 Opening a link from Quark switches to the browser; `Super+Tab` takes you back.
 
@@ -47,8 +47,8 @@ quark-de --check           # lists anything still missing and how to get it
 
 Log out, pick **Quark** at the login screen. `sudo make uninstall` removes it.
 
-Using a different browser? Change the `exec firefox` line and its `assign [app_id="firefox"]` rule in
-`config/sway/config` to match (`swaymsg -t get_tree | grep app_id` shows the app ID).
+Using a different browser? Change the `exec firefox` line, its `assign [app_id="firefox"]` rule and the `$mod+2`
+binding (`quark-de-focus <workspace> <app_id> <command>`) in `config/sway/config` to match (`swaymsg -t get_tree | grep app_id` shows the app ID).
 
 ## Roadmap
 
