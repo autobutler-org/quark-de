@@ -84,6 +84,13 @@ Copies a password manager marks with `x-kde-passwordManagerHint` (KeePassXC does
 workspace. Click one to dismiss it. Do-not-disturb hides them until you toggle it off. `Super+Shift+N` restores
 from a history of the last 20. The config is `config/mako/config`.
 
+## Startup apps
+
+Apps in `~/.config/autostart/*.desktop` and `/etc/xdg/autostart/` start at login, honoring their `OnlyShowIn` /
+`NotShowIn` keys against the session's `XDG_CURRENT_DESKTOP`. With a systemd user session, `quark-de-autostart`
+starts `xdg-desktop-autostart.target`; without one it runs `dex -a`. If an app fails to start, you get a
+notification saying which one and how to find out why.
+
 ## Install
 
 Dependencies: `sway`, `foot`, `firefox`, `swayidle`, `swaylock`, `mako` (notifications; the session starts without
@@ -100,11 +107,14 @@ Optional: `wl-clipboard` and `cliphist` for clipboard history, `wofi` for the `S
 
 Optional, for screenshots: `grim`, `slurp`, and `wl-copy` (from `wl-clipboard`).
 
+Optional: `dex`, which starts your startup apps when there is no systemd user session.
+
 ```bash
 sudo apt install sway foot firefox swayidle swaylock mako-notifier xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
 sudo apt install wireplumber brightnessctl playerctl libnotify-bin   # optional
 sudo apt install wl-clipboard cliphist wofi   # optional: clipboard history
 sudo apt install grim slurp wl-clipboard   # optional: screenshots
+sudo apt install dex   # optional: startup apps without systemd
 sudo make install          # PREFIX=/usr/local by default; DESTDIR is honored
 quark-de --check           # lists anything still missing and how to get it
 ```
