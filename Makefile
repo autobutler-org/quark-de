@@ -13,15 +13,16 @@ help:
 	@echo "make test       run the headless sway tests (needs sway, foot, jq)"
 
 install:
-	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/share/quark-de/sway $(DESTDIR)$(WAYLAND_SESSIONS)
+	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/share/quark-de/sway $(DESTDIR)$(PREFIX)/share/xdg-desktop-portal $(DESTDIR)$(WAYLAND_SESSIONS)
 	install -m755 session/quark-de $(DESTDIR)$(PREFIX)/bin/quark-de
 	install -m755 $(HELPERS) $(DESTDIR)$(PREFIX)/bin/
 	install -m644 config/sway/config $(DESTDIR)$(PREFIX)/share/quark-de/sway/config
 	install -m644 config/sway/fallback $(DESTDIR)$(PREFIX)/share/quark-de/sway/fallback
+	install -m644 config/xdg-desktop-portal/quark-portals.conf $(DESTDIR)$(PREFIX)/share/xdg-desktop-portal/quark-portals.conf
 	sed 's|^Exec=.*|Exec=$(PREFIX)/bin/quark-de|' session/quark-de.desktop > $(DESTDIR)$(WAYLAND_SESSIONS)/quark-de.desktop
 
 uninstall:
-	rm -f $(DESTDIR)$(PREFIX)/bin/quark-de $(addprefix $(DESTDIR)$(PREFIX)/bin/,$(notdir $(HELPERS))) $(DESTDIR)$(WAYLAND_SESSIONS)/quark-de.desktop
+	rm -f $(DESTDIR)$(PREFIX)/bin/quark-de $(addprefix $(DESTDIR)$(PREFIX)/bin/,$(notdir $(HELPERS))) $(DESTDIR)$(WAYLAND_SESSIONS)/quark-de.desktop $(DESTDIR)$(PREFIX)/share/xdg-desktop-portal/quark-portals.conf
 	rm -rf $(DESTDIR)$(PREFIX)/share/quark-de
 
 check:

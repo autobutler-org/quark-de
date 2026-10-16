@@ -21,7 +21,7 @@ USAGE
 # hint <command>: how to get it.
 hint() {
 	case "$1" in
-	sway | foot | firefox | swayidle | swaylock) echo "sudo apt install $1" ;;
+	sway | foot | firefox | swayidle | swaylock | xdg-desktop-portal*) echo "sudo apt install $1" ;;
 	quark) echo "install the Quark Linux app from https://github.com/autobutler-org/quark/releases and put 'quark' on PATH" ;;
 	wpctl) echo "sudo apt install wireplumber (volume keys stay dead without it)" ;;
 	brightnessctl) echo "sudo apt install brightnessctl (brightness keys stay dead without it)" ;;
@@ -77,6 +77,29 @@ need_file() {
 	fi
 }
 
+portal_file() {
+	case "$1" in
+	xdg-desktop-portal) echo dbus-1/services/org.freedesktop.portal.Desktop.service ;;
+	*) echo "xdg-desktop-portal/portals/${1#xdg-desktop-portal-}.portal" ;;
+	esac
+}
+
+check_portals() {
+	for portal in xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk; do
+		found=
+		IFS=:
+		for dir in ${XDG_DATA_DIRS:-/usr/local/share:/usr/share}; do
+			[ -e "$dir/$(portal_file "$portal")" ] && found=1
+		done
+		unset IFS
+		if [ -n "$found" ]; then
+			echo "ok       $portal"
+		else
+			echo "warn     $portal — $(hint "$portal") (file dialogs and screen sharing need it)"
+		fi
+	done
+}
+
 case "${1:-}" in
 -h | --help)
 	usage
@@ -84,6 +107,7 @@ case "${1:-}" in
 	;;
 --check | doctor)
 	warn_optional
+	check_portals
 	check sway quark foot firefox swayidle swaylock
 	exit
 	;;
@@ -114,4 +138,5 @@ if ! command -v quark >/dev/null 2>&1; then
 fi
 
 need_file "$config"
+export XDG_CURRENT_DESKTOP=Quark:sway XDG_SESSION_DESKTOP=quark-de
 exec sway --config "$config"
