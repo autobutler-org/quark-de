@@ -30,9 +30,14 @@ Under the hood it's [sway](https://swaywm.org) with a short config and a launche
 | `Super+2`       | browser (starts it if closed)  |
 | `Super+3`       | terminal (starts it if closed) |
 | `Super+Tab`     | back to Quark                  |
+| `Super+/`       | show these keys                |
+| `Super+F1`      | show these keys                |
 | `Super+Shift+E` | log out                        |
 
 Opening a link from Quark switches to the browser; `Super+Tab` takes you back.
+
+On your first login a bar at the top of the screen lists these keys. It shows once: a marker in
+`${XDG_STATE_HOME:-~/.local/state}/quark-de/` remembers that you have seen it.
 
 ## Install
 

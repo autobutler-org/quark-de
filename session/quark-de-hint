@@ -1,0 +1,36 @@
+#!/bin/sh
+set -eu
+
+readonly message='Quark keys: Super+2 browser · Super+3 terminal · Super+Tab or Super+1 back to Quark · Super+Shift+E log out · Super+/ or Super+F1 shows this again'
+readonly marker="${XDG_STATE_HOME:-$HOME/.local/state}/quark-de/first-login-hint-shown"
+
+usage() {
+	cat <<USAGE
+Usage: quark-de-hint [--first-login | -h]
+
+Show the Quark DE keyboard cheat sheet.
+
+  --first-login  show it only if it has not been shown before (marker: $marker)
+  -h             show this help
+USAGE
+}
+
+case "${1:-}" in
+-h | --help)
+	usage
+	exit 0
+	;;
+--first-login)
+	[ -e "$marker" ] && exit 0
+	mkdir -p "$(dirname "$marker")"
+	: >"$marker"
+	;;
+"") ;;
+*)
+	echo "quark-de-hint: unknown argument '$1'" >&2
+	usage >&2
+	exit 2
+	;;
+esac
+
+exec swaynag -t warning -m "$message" -s 'Got it'

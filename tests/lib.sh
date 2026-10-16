@@ -15,7 +15,8 @@ harness_setup() {
 	chmod 700 "$runtime"
 	printf '#!/bin/sh\nexec foot --app-id=org.autobutler.quark\n' >"$tmp/shim/quark"
 	printf '#!/bin/sh\nexec foot --app-id=firefox\n' >"$tmp/shim/firefox"
-	chmod +x "$tmp/shim/quark" "$tmp/shim/firefox"
+	printf '#!/bin/sh\nprintf "%%s\\n" "$@" >>"%s/swaynag.args"\n' "$tmp" >"$tmp/shim/swaynag"
+	chmod +x "$tmp/shim/quark" "$tmp/shim/firefox" "$tmp/shim/swaynag"
 	trap harness_teardown EXIT
 }
 
@@ -30,7 +31,7 @@ harness_teardown() {
 sway_env() {
 	env PATH="$tmp/shim:$tmp/usr/bin:$PATH" \
 		WLR_BACKENDS=headless WLR_LIBINPUT_NO_DEVICES=1 WLR_RENDERER=pixman \
-		XDG_RUNTIME_DIR="$runtime" "$@"
+		XDG_RUNTIME_DIR="$runtime" XDG_STATE_HOME="$tmp/state" "$@"
 }
 
 sway_start() {

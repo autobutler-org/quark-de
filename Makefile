@@ -3,7 +3,8 @@ WAYLAND_SESSIONS ?= /usr/share/wayland-sessions
 
 .PHONY: help install uninstall check test
 
-SHELL_FILES = session/quark-de $(wildcard session/quark-de-*) $(wildcard tests/*.sh tests/*/*.sh)
+HELPERS = $(wildcard session/quark-de-*)
+SHELL_FILES = session/quark-de $(HELPERS) $(wildcard tests/*.sh tests/*/*.sh)
 
 help:
 	@echo "make install    install the session (PREFIX=$(PREFIX), DESTDIR supported)"
@@ -14,12 +15,12 @@ help:
 install:
 	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/share/quark-de/sway $(DESTDIR)$(WAYLAND_SESSIONS)
 	install -m755 session/quark-de $(DESTDIR)$(PREFIX)/bin/quark-de
-	install -m755 session/quark-de-focus $(DESTDIR)$(PREFIX)/bin/quark-de-focus
+	install -m755 $(HELPERS) $(DESTDIR)$(PREFIX)/bin/
 	install -m644 config/sway/config $(DESTDIR)$(PREFIX)/share/quark-de/sway/config
 	sed 's|^Exec=.*|Exec=$(PREFIX)/bin/quark-de|' session/quark-de.desktop > $(DESTDIR)$(WAYLAND_SESSIONS)/quark-de.desktop
 
 uninstall:
-	rm -f $(DESTDIR)$(PREFIX)/bin/quark-de $(DESTDIR)$(PREFIX)/bin/quark-de-focus $(DESTDIR)$(WAYLAND_SESSIONS)/quark-de.desktop
+	rm -f $(DESTDIR)$(PREFIX)/bin/quark-de $(addprefix $(DESTDIR)$(PREFIX)/bin/,$(notdir $(HELPERS))) $(DESTDIR)$(WAYLAND_SESSIONS)/quark-de.desktop
 	rm -rf $(DESTDIR)$(PREFIX)/share/quark-de
 
 check:
