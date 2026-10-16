@@ -1,0 +1,93 @@
+#!/bin/sh
+set -eu
+
+readonly sink=@DEFAULT_AUDIO_SINK@
+readonly source=@DEFAULT_AUDIO_SOURCE@
+
+usage() {
+	cat <<USAGE
+Usage: quark-de-osd ACTION
+
+Run a media, volume or brightness key and show the new level.
+Bound to the XF86 keys in the Quark DE sway config.
+
+  volume-up | volume-down | mute | mic-mute
+  brightness-up | brightness-down
+  play-pause | pause | next | previous
+USAGE
+}
+
+osd() {
+	command -v notify-send >/dev/null 2>&1 || return 0
+	notify-send -a quark-de -u low -t 1500 -h string:x-canonical-private-synchronous:quark-de-osd -h "int:value:$1" "$2" "$3" 2>/dev/null || :
+}
+
+need() {
+	command -v "$1" >/dev/null 2>&1 && return 0
+	message="$1 is not installed; run 'quark-de --check' to see how to install it"
+	echo "quark-de-osd: $message" >&2
+	if command -v notify-send >/dev/null 2>&1; then
+		notify-send -a quark-de -u critical "Key not working" "$message" 2>/dev/null || :
+	fi
+	exit 1
+}
+
+show_volume() {
+	wpctl get-volume "$1" | awk -v label="$2" '{
+		if (/MUTED/) print 0, label, "muted"
+		else { p = int($2 * 100 + 0.5); print p, label, p "%" }
+	}' | {
+		read -r level label text
+		osd "$level" "$label" "$text"
+	}
+}
+
+show_brightness() {
+	level="$(brightnessctl -m | awk -F, '{ sub(/%/, "", $4); print $4 }')"
+	osd "$level" Brightness "$level%"
+}
+
+case "${1:-}" in
+volume-up)
+	need wpctl
+	wpctl set-volume -l 1.0 "$sink" 5%+
+	show_volume "$sink" Volume
+	;;
+volume-down)
+	need wpctl
+	wpctl set-volume "$sink" 5%-
+	show_volume "$sink" Volume
+	;;
+mute)
+	need wpctl
+	wpctl set-mute "$sink" toggle
+	show_volume "$sink" Volume
+	;;
+mic-mute)
+	need wpctl
+	wpctl set-mute "$source" toggle
+	show_volume "$source" Microphone
+	;;
+brightness-up)
+	need brightnessctl
+	brightnessctl -q set 5%+
+	show_brightness
+	;;
+brightness-down)
+	need brightnessctl
+	brightnessctl -q --min-value=1 set 5%-
+	show_brightness
+	;;
+play-pause | pause | next | previous)
+	need playerctl
+	playerctl "$1"
+	;;
+-h | --help)
+	usage
+	;;
+*)
+	echo "quark-de-osd: unknown action '${1:-}'" >&2
+	usage >&2
+	exit 2
+	;;
+esac
