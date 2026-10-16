@@ -16,6 +16,7 @@ assign [app_id="org.autobutler.quark"] workspace $quark
 assign [app_id="firefox"] workspace $browser
 assign [app_id="foot"] workspace $terminal
 for_window [app_id="org.autobutler.quark"] fullscreen enable
+focus_on_window_activation focus
 
 # ponytail: plain respawn loop; Quark crashing would otherwise leave an empty desktop.
 exec sh -c 'while :; do quark; sleep 1; done'

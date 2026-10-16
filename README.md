@@ -32,6 +32,8 @@ Under the hood it's [sway](https://swaywm.org) with a short config and a launche
 | `Super+Tab`     | back to Quark            |
 | `Super+Shift+E` | log out                  |
 
+Opening a link from Quark switches to the browser; `Super+Tab` takes you back.
+
 ## Install
 
 Dependencies: `sway`, `foot`, `firefox`, and the Quark Linux app (`quark` on `PATH`, from the
