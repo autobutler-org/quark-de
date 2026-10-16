@@ -15,3 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - run: make check
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - run: sudo apt-get update && sudo apt-get install -y sway foot jq
+      - run: make test
