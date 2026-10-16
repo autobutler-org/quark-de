@@ -22,12 +22,15 @@ focus_on_window_activation focus
 exec sh -c 'while :; do quark; sleep 1; done'
 exec firefox
 exec foot
+exec quark-de-hint --first-login
 
 # The first workspace bound below is the one sway starts on.
 bindsym $mod+1 workspace $quark
 bindsym $mod+2 exec quark-de-focus $browser firefox firefox
 bindsym $mod+3 exec quark-de-focus $terminal foot foot
 bindsym $mod+Tab workspace $quark
+bindsym $mod+slash exec quark-de-hint
+bindsym $mod+F1 exec quark-de-hint
 bindsym $mod+Shift+e exec swaynag -t warning -m 'Log out of Quark?' -B 'Log out' 'swaymsg exit'
 
 # Distro snippets (systemd/D-Bus environment, xdg-desktop-portal for file dialogs).
