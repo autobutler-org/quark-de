@@ -20,6 +20,10 @@ Under the hood it's [sway](https://swaywm.org) with a short config and a launche
 | 2 `browser`  | Firefox                                 |
 | 3 `terminal` | foot                                    |
 
+If Quark exits, it is restarted and workspace 1 gets focus back. If it exits 3 times within 30 seconds, the
+restarts stop and a bar says "Quark keeps crashing." with buttons to open a terminal, view the log, retry, or log
+out. Quark's output is appended to `${XDG_STATE_HOME:-~/.local/state}/quark-de/quark.log`.
+
 ## Keybinds
 
 `Super` is the Windows/Command key.
