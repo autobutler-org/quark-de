@@ -20,7 +20,7 @@ USAGE
 # hint <command>: how to get it.
 hint() {
 	case "$1" in
-	sway | foot | firefox) echo "sudo apt install $1" ;;
+	sway | foot | firefox | swayidle | swaylock) echo "sudo apt install $1" ;;
 	quark) echo "install the Quark Linux app from https://github.com/autobutler-org/quark/releases and put 'quark' on PATH" ;;
 	esac
 }
@@ -49,7 +49,7 @@ case "${1:-}" in
 	exit 0
 	;;
 --check | doctor)
-	check sway quark foot firefox
+	check sway quark foot firefox swayidle swaylock
 	exit
 	;;
 "") ;;
