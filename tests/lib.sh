@@ -13,11 +13,22 @@ harness_setup() {
 	runtime="$tmp/run"
 	mkdir -p "$runtime" "$tmp/shim"
 	chmod 700 "$runtime"
-	printf '#!/bin/sh\nexec foot --app-id=org.autobutler.quark\n' >"$tmp/shim/quark"
-	printf '#!/bin/sh\nexec foot --app-id=firefox\n' >"$tmp/shim/firefox"
-	printf '#!/bin/sh\nprintf "%%s\\n" "$@" >>"%s/swaynag.args"\n' "$tmp" >"$tmp/shim/swaynag"
-	chmod +x "$tmp/shim/quark" "$tmp/shim/firefox" "$tmp/shim/swaynag"
+	stub quark 'exec foot --app-id=org.autobutler.quark'
+	stub firefox 'exec foot --app-id=firefox'
+	stub swaynag "printf '%s\\n' \"\$@\" >>\"$tmp/swaynag.args\""
 	trap harness_teardown EXIT
+}
+
+unit_setup() {
+	tmp="$(mktemp -d)"
+	repo="$(cd "$(dirname "$0")/../.." && pwd)"
+	mkdir -p "$tmp/shim"
+	trap 'rm -rf "$tmp"' EXIT
+}
+
+stub() {
+	printf '#!/bin/sh\n%s\n' "${2:-}" >"$tmp/shim/$1"
+	chmod +x "$tmp/shim/$1"
 }
 
 harness_teardown() {

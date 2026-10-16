@@ -79,8 +79,9 @@ binding (`quark-de-focus <workspace> <app_id> <command>`) in `config/sway/config
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). `make check` lints the shell scripts and runs the unit tests; `make test` runs
-the headless sway tests (needs `sway`, `foot` and `jq`).
+See [CONTRIBUTING.md](CONTRIBUTING.md). `make check` lints (needs `shellcheck`, `shfmt`, `desktop-file-validate` and
+`actionlint`; it says how to get any that are missing) and runs the unit tests; `make test` runs the headless sway tests
+(needs `sway`, `foot` and `jq`).
 
 ## License
 
