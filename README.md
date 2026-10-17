@@ -64,8 +64,33 @@ locked. Volume and brightness changes show the new level as a notification, so a
 
 After 5 minutes idle the screen locks (swaylock); after 10 it turns off and wakes on input. Suspend and lid
 close lock before sleeping. A fullscreen browser or other app (a video, say) keeps the screen on; Quark itself
-does not, because it is always fullscreen. Without `swayidle` or `swaylock` the session still starts, just without
-locking.
+does not, because it is always fullscreen. `loginctl lock-session` locks too. Without `swayidle` or `swaylock` the
+session still starts, just without locking.
+
+To change the timeouts, put them in a file in `~/.config/quark-de/sway/` (`$XDG_CONFIG_HOME/quark-de/sway/` if set),
+such as `~/.config/quark-de/sway/idle`, and log in again. Values are in seconds:
+
+```text
+set $lock_timeout 600
+set $screen_off_timeout 900
+```
+
+While locked, only the volume, brightness and media keys work, and notifications stay hidden behind the lock.
+
+Two things the lock does not cover:
+
+- **Other consoles.** `Ctrl+Alt+F<n>` still switches to a text console. The lock keeps this session covered, but
+  anyone already logged in on another console is not locked. Log out of consoles you are not using; on an appliance,
+  mask the spare gettys (`sudo systemctl mask getty@tty3.service`, and so on), keeping one for the recovery below.
+- **A crashed locker.** If swaylock dies, the session stays locked: the outputs stay covered (blank or solid red)
+  and input does nothing. To unlock, switch to a text console with `Ctrl+Alt+F2`, log in as the same user, and
+  start a new locker:
+
+  ```bash
+  WAYLAND_DISPLAY=wayland-1 swaylock -f   # ls $XDG_RUNTIME_DIR shows the wayland-N name
+  ```
+
+  Switch back with `Ctrl+Alt+F1` (or whichever console the session runs on) and unlock as usual.
 
 ## Keyboard layout and input methods
 

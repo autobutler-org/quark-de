@@ -5,6 +5,9 @@ set $quark 1:quark
 set $browser 2:browser
 set $terminal 3:terminal
 set $share /usr/local/share/quark-de
+set $lock_timeout 300
+set $screen_off_timeout 600
+include ${XDG_CONFIG_HOME:-$HOME/.config}/quark-de/sway/*
 
 # No bar, no decorations: Quark draws the whole screen.
 default_border none
@@ -29,7 +32,7 @@ exec quark-de-respawn $quark
 exec quark-de-browser
 exec foot
 exec quark-de-hint --first-login
-exec swayidle -w timeout 300 'swaylock -f' timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' before-sleep 'swaylock -f'
+exec swayidle -w timeout $lock_timeout 'swaylock -f' timeout $screen_off_timeout 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' before-sleep 'swaylock -f' lock 'swaylock -f'
 exec wl-paste --watch quark-de-clipboard store
 exec mako --config $share/mako/config
 exec quark-de-autostart
