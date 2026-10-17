@@ -38,6 +38,14 @@ hint() {
 	esac
 }
 
+browser() {
+	if ! command -v firefox >/dev/null 2>&1 && command -v firefox-esr >/dev/null 2>&1; then
+		echo firefox-esr
+	else
+		echo firefox
+	fi
+}
+
 warn_optional() {
 	for cmd in mako wpctl brightnessctl playerctl notify-send wl-paste cliphist wofi grim slurp wl-copy dex; do
 		if command -v "$cmd" >/dev/null 2>&1; then
@@ -116,7 +124,7 @@ case "${1:-}" in
 --check | doctor)
 	warn_optional
 	check_portals
-	check sway quark foot firefox swayidle swaylock
+	check sway quark foot "$(browser)" swayidle swaylock
 	exit
 	;;
 --report)
@@ -130,7 +138,7 @@ case "${1:-}" in
 	;;
 esac
 
-for cmd in foot firefox; do
+for cmd in foot "$(browser)"; do
 	command -v "$cmd" >/dev/null 2>&1 || log "warning: $cmd is missing, so its workspace stays empty — $(hint "$cmd")"
 done
 

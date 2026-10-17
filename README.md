@@ -94,8 +94,8 @@ notification saying which one and how to find out why.
 
 ## Install
 
-Dependencies: `sway`, `foot`, `firefox`, `swayidle`, `swaylock`, `mako` (notifications; the session starts without
-it), and the Quark Linux app (`quark` on `PATH`, from the
+Dependencies: `sway`, `foot`, `firefox` (or `firefox-esr`, Debian's default), `swayidle`, `swaylock`, `mako`
+(notifications; the session starts without it), and the Quark Linux app (`quark` on `PATH`, from the
 [Quark releases](https://github.com/autobutler-org/quark/releases)). File dialogs and screen sharing also need
 `xdg-desktop-portal`, `xdg-desktop-portal-wlr` and `xdg-desktop-portal-gtk`; `quark-de --check` warns if they are
 missing.
@@ -137,8 +137,9 @@ The session sets `XDG_CURRENT_DESKTOP=Quark:sway`, and `make install` puts `quar
 `$PREFIX/share/xdg-desktop-portal/`: screen sharing and screenshots go to the wlr portal, everything else (file
 pickers, settings) to the gtk one.
 
-Using a different browser? Change the `exec firefox` line, its `assign [app_id="firefox"]` rule and the `$mod+2`
-binding (`quark-de-focus <workspace> <app_id> <command>`) in `config/sway/config` to match (`swaymsg -t get_tree | grep app_id` shows the app ID).
+Using a different browser? Change the `exec quark-de-browser` line (it starts `firefox`, or `firefox-esr` when that
+is the one installed), its `assign [app_id="^firefox(-esr)?$"]` rule and the `$mod+2` binding
+(`quark-de-focus <workspace> <app_id> <command>`) in `config/sway/config` to match (`swaymsg -t get_tree | grep app_id` shows the app ID).
 
 ## Roadmap
 
