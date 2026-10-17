@@ -22,6 +22,7 @@ for_window [app_id="^(?!org\.autobutler\.quark$)"] inhibit_idle fullscreen
 for_window [shell="xwayland"] inhibit_idle fullscreen
 
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP SWAYSOCK
+exec quark-de-keyboard
 
 # Respawn Quark; after repeated crashes, say so instead of leaving an empty desktop.
 exec quark-de-respawn $quark

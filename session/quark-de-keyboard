@@ -1,0 +1,36 @@
+#!/bin/sh
+set -u
+
+readonly file="${1:-/etc/default/keyboard}"
+status=
+failed=0
+
+if [ -r "$file" ]; then
+	readonly source="$file"
+elif command -v localectl >/dev/null 2>&1 && status="$(localectl status 2>/dev/null)"; then
+	readonly source="localectl status"
+else
+	exit 0
+fi
+
+lookup() {
+	if [ "$source" = "$file" ]; then
+		sed -n "s/^[[:space:]]*$1=[\"']\{0,1\}\([^\"']*\)[\"']\{0,1\}[[:space:]]*\$/\1/p" "$file" | tail -n 1
+	else
+		printf '%s\n' "$status" | sed -n "s/^[[:space:]]*X11 $2:[[:space:]]*//p" | grep -vx 'n/a' | tail -n 1
+	fi
+}
+
+apply() {
+	value="$(lookup "$1" "$2")"
+	[ -n "$value" ] || return 0
+	swaymsg "input type:keyboard xkb_$3 \"$value\"" >/dev/null && return 0
+	echo "quark-de-keyboard: sway rejected xkb_$3 '$value' from $source; set a valid one with 'sudo localectl set-x11-keymap <layout> [model] [variant] [options]', then log in again." >&2
+	failed=1
+}
+
+apply XKBMODEL Model model
+apply XKBLAYOUT Layout layout
+apply XKBVARIANT Variant variant
+apply XKBOPTIONS Options options
+exit "$failed"
