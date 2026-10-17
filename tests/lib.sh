@@ -95,6 +95,19 @@ app_on_workspace() {
 		'[.. | objects | select(.type? == "workspace" and .name == $ws) | .. | objects | select(.app_id? == $id)] | length > 0' >/dev/null
 }
 
+quark_shown_on() {
+	swaymsg_ -t get_tree | jq -e --arg out "$1" '
+		[.. | objects | select(.type? == "output" and .name == $out) | .rect as $r
+		| .nodes[] | select(.type == "workspace" and .name == "1:quark")
+		| .. | objects | select(.app_id? == "org.autobutler.quark" and .fullscreen_mode == 1 and .visible and .rect == $r)]
+		| length == 1' >/dev/null &&
+		swaymsg_ -t get_workspaces | jq -e --arg out "$1" 'any(.[]; .name == "1:quark" and .output == $out and .visible)' >/dev/null
+}
+
+output_layout() {
+	swaymsg_ -t get_tree | jq -c '[.. | objects | select(.type? == "output") | {name, rect, workspaces: [.nodes[] | {name, apps: [.. | objects | select(.app_id? != null) | {app_id, fullscreen_mode, visible, rect}]}]}]'
+}
+
 app_kill() {
 	swaymsg_ -t get_tree | jq -r --arg id "$1" '.. | objects | select(.app_id? == $id) | .pid' | xargs kill
 }
