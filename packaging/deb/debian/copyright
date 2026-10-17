@@ -1,0 +1,8 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: quark-de
+Source: https://github.com/autobutler-org/quark-de
+
+Files: *
+Copyright: Brandon Apol
+License: see the upstream repository
+ See https://github.com/autobutler-org/quark-de for the license terms.
