@@ -49,4 +49,8 @@ start_elsewhere 1:quark firefox
 start_elsewhere 2:browser foot
 wait_for 10 views_up 6 || fail "the hand-started clients did not map; views: $(views)"
 check_views 2
+
+start_elsewhere 1:quark firefox-esr
+wait_for 10 app_views_is firefox-esr 1 || fail "the hand-started firefox-esr did not map; views: $(views)"
+app_on_workspace firefox-esr 2:browser || fail "firefox-esr opened off 2:browser; views: $(views)"
 echo "ok  assign rules"

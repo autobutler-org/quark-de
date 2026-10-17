@@ -12,9 +12,9 @@ default_floating_border none
 gaps inner 0
 gaps outer 0
 
-# App IDs: Quark's Flutter APPLICATION_ID (quark/linux/CMakeLists.txt), firefox, foot.
+# App IDs: Quark's Flutter APPLICATION_ID (quark/linux/CMakeLists.txt), firefox (firefox-esr on Debian), foot.
 assign [app_id="org.autobutler.quark"] workspace $quark
-assign [app_id="firefox"] workspace $browser
+assign [app_id="^firefox(-esr)?$"] workspace $browser
 assign [app_id="foot"] workspace $terminal
 for_window [app_id="org.autobutler.quark"] fullscreen enable
 focus_on_window_activation focus
@@ -25,7 +25,7 @@ exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DE
 
 # Respawn Quark; after repeated crashes, say so instead of leaving an empty desktop.
 exec quark-de-respawn $quark
-exec firefox
+exec quark-de-browser
 exec foot
 exec quark-de-hint --first-login
 exec swayidle -w timeout 300 'swaylock -f' timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' before-sleep 'swaylock -f'
@@ -35,7 +35,7 @@ exec quark-de-autostart
 
 # The first workspace bound below is the one sway starts on.
 bindsym $mod+1 workspace $quark
-bindsym $mod+2 exec quark-de-focus $browser firefox firefox
+bindsym $mod+2 exec quark-de-focus $browser 'firefox(-esr)?' quark-de-browser
 bindsym $mod+3 exec quark-de-focus $terminal foot foot
 bindsym $mod+Tab workspace $quark
 bindsym $mod+slash exec quark-de-hint
