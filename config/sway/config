@@ -5,6 +5,7 @@ set $quark 1:quark
 set $browser 2:browser
 set $terminal 3:terminal
 set $share /usr/local/share/quark-de
+set $primary HDMI-A-1
 set $lock_timeout 300
 set $screen_off_timeout 600
 include ${XDG_CONFIG_HOME:-$HOME/.config}/quark-de/sway/*
@@ -14,6 +15,10 @@ default_border none
 default_floating_border none
 gaps inner 0
 gaps outer 0
+
+workspace $quark output $primary *
+workspace $browser output $primary
+workspace $terminal output $primary
 
 # App IDs: Quark's Flutter APPLICATION_ID (quark/linux/CMakeLists.txt), firefox (firefox-esr on Debian), foot.
 assign [app_id="org.autobutler.quark"] workspace $quark

@@ -113,6 +113,30 @@ exec fcitx5 -d --replace
 Quark and other Wayland apps get input through the `text-input-v3` protocol, which sway supports; GTK apps that do
 not speak it need `GTK_IM_MODULE=fcitx` (or `ibus`) in their environment.
 
+## Displays
+
+Quark, the browser and the terminal live on one display, the primary: `HDMI-A-1` by default. Any other display shows
+an empty workspace. If the primary isn't connected, Quark goes full screen on another display. Unplug the display
+Quark is on and it moves, still full screen, to one that's left; plug the primary back in and the three workspaces
+move back to it.
+
+To pick a different primary, put `set $primary DP-1` in a file in `~/.config/quark-de/sway/`, the same place as the
+idle timeouts, and log in again. `swaymsg -t get_outputs` lists your displays' names. You can
+list several, most preferred first: `set $primary DP-1 HDMI-A-1`.
+
+Without an `output` line sway guesses each display's scale, so a 4K TV may come up at scale 1 with tiny text. Set it,
+and the mode or position if you need them, with sway's `output` command in a file under `/etc/sway/config.d/`, which
+the session reads at login:
+
+```text
+output HDMI-A-1 scale 2
+output HDMI-A-1 mode 3840x2160@60Hz
+output eDP-1 position 0 0
+output HDMI-A-1 position 1920 0
+```
+
+`swaymsg output HDMI-A-1 scale 2` tries a setting live. `man sway-output` has the rest.
+
 ## Clipboard
 
 Everything you copy is kept in a [cliphist](https://github.com/sentriz/cliphist) history. On Wayland the clipboard
