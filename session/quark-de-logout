@@ -1,0 +1,49 @@
+#!/bin/sh
+set -u
+
+readonly action="${1:-logout}"
+readonly grace=5
+readonly pidfile="${XDG_STATE_HOME:-$HOME/.local/state}/quark-de/respawn.pid"
+
+case "$action" in
+logout | poweroff | reboot) ;;
+*)
+	echo "usage: quark-de-logout [logout | poweroff | reboot]" >&2
+	exit 2
+	;;
+esac
+
+stop_quark() {
+	[ -r "$pidfile" ] || return 0
+	loop="$(cat "$pidfile")"
+	rm -f "$pidfile"
+	case "$loop" in
+	'' | *[!0-9]*) return 0 ;;
+	esac
+	ps -o args= -p "$loop" 2>/dev/null | grep -q quark-de-respawn || return 0
+	apps="$(pgrep -P "$loop")"
+	kill -TERM "$loop" 2>/dev/null
+	[ -n "$apps" ] || return 0
+	# shellcheck disable=SC2086
+	kill -TERM $apps 2>/dev/null
+	waited=0
+	while [ "$waited" -lt "$grace" ]; do
+		alive=
+		for pid in $apps; do
+			kill -0 "$pid" 2>/dev/null && alive=1
+		done
+		[ -n "$alive" ] || return 0
+		sleep 1
+		waited=$((waited + 1))
+	done
+}
+
+stop_quark
+if systemctl --user show-environment >/dev/null 2>&1; then
+	systemctl --user stop graphical-session.target
+fi
+if [ "$action" != logout ]; then
+	systemctl "$action" && exit 0
+	echo "quark-de-logout: 'systemctl $action' failed, so logging out instead. Check that systemd-logind is running and allows $action for your user." >&2
+fi
+swaymsg exit

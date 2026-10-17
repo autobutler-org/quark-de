@@ -45,7 +45,7 @@ out. Once sway is gone, Quark is not restarted. Quark's output is appended to
 | `Print`         | screenshot, full screen        |
 | `Shift+Print`   | screenshot, region             |
 | `Super+Print`   | screenshot, window             |
-| `Super+Shift+E` | log out                        |
+| `Super+Shift+E` | log out, lock, power off       |
 
 Opening a link from Quark switches to the browser; `Super+Tab` takes you back.
 
@@ -136,6 +136,27 @@ output HDMI-A-1 position 1920 0
 ```
 
 `swaymsg output HDMI-A-1 scale 2` tries a setting live. `man sway-output` has the rest.
+
+## Log out and power
+
+`Super+Shift+E` opens a bar with Log out, Lock, Power off and Reboot. Each of Log out, Power off and Reboot runs
+`quark-de-logout`, which stops Quark's restart loop, asks Quark to close (SIGTERM, then up to 5 seconds to save
+and exit), stops `graphical-session.target` when there is a systemd user session, and then logs out of sway or
+asks systemd-logind to power off or reboot (`systemctl poweroff` / `systemctl reboot`, no sudo). If logind refuses,
+you are logged out instead.
+
+What closing a laptop lid does is up to logind; by default it suspends, and the screen locks first. To change it,
+for example to keep running with the lid closed on mains power, add a drop-in and restart logind (or reboot):
+
+```ini
+# /etc/systemd/logind.conf.d/quark-de-lid.conf
+[Login]
+HandleLidSwitch=suspend
+HandleLidSwitchExternalPower=ignore
+HandleLidSwitchDocked=ignore
+```
+
+Each takes `suspend`, `hibernate`, `poweroff`, `lock` or `ignore`. See `man logind.conf`.
 
 ## Clipboard
 

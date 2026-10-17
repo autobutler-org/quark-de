@@ -22,6 +22,7 @@ mkdir -p "$state" || {
 	echo "quark-de-respawn: cannot create $state; check its permissions, then log in again" >&2
 	exit 1
 }
+echo "$$" >"$state/respawn.pid"
 
 exits=""
 restart=0
