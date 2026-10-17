@@ -14,12 +14,18 @@ Usage: quark-de-clipboard store | pick
 USAGE
 }
 
+secret_offered() {
+	wl-paste --list-types 2>/dev/null | grep -qx "$password_hint"
+}
+
 store() {
-	if wl-paste --list-types 2>/dev/null | grep -qx "$password_hint"; then
-		cat >/dev/null
-		exit 0
-	fi
-	exec cliphist store
+	copy="$(mktemp)"
+	trap 'rm -f "$copy"' EXIT
+	cat >"$copy"
+	secret_offered && exit 0
+	wl-paste --no-newline 2>/dev/null | cmp -s - "$copy" || exit 0
+	secret_offered && exit 0
+	cliphist store <"$copy"
 }
 
 pick() {
