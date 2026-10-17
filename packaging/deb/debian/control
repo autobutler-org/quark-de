@@ -1,0 +1,40 @@
+Source: quark-de
+Section: x11
+Priority: optional
+Maintainer: Brandon Apol <apolbrandon@gmail.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/autobutler-org/quark-de
+Rules-Requires-Root: no
+
+Package: quark-de
+Architecture: all
+Depends: ${misc:Depends},
+ sway,
+ foot,
+ firefox-esr | firefox,
+ swayidle,
+ swaylock,
+ xdg-desktop-portal,
+ xdg-desktop-portal-wlr,
+ xdg-desktop-portal-gtk,
+Recommends: mako-notifier,
+ libnotify-bin,
+ wl-clipboard,
+ cliphist,
+ wofi,
+ grim,
+ slurp,
+ wireplumber,
+ brightnessctl,
+ playerctl,
+ dex,
+ lxpolkit,
+Description: Wayland desktop session where the Quark app is the desktop
+ Quark DE is a sway configuration and a POSIX sh launcher. It adds a "Quark"
+ entry to the display manager that starts sway with the Quark Flutter app
+ fullscreen as the desktop and a browser and a terminal on side workspaces.
+ .
+ The Quark app itself is not packaged yet: install the Quark Linux app from
+ https://github.com/autobutler-org/quark/releases and put "quark" on PATH.
+ Run "quark-de --check" to list anything missing.
