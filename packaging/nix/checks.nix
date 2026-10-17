@@ -39,7 +39,7 @@ in
   launcher = pkgs.runCommand "quark-de-launcher-check" { } ''
     PATH= ${quark-de}/bin/quark-de --check >check.log 2>&1 || :
     cat check.log
-    for want in sway foot swayidle swaylock mako wpctl wl-copy grim polkit-agent; do
+    for want in sway foot swayidle swaylock mako wpctl wl-copy grim socat polkit-agent; do
       ${pkgs.gnugrep}/bin/grep -Eq "^ok +$want( |$)" check.log || { echo "quark-de --check did not find $want"; exit 1; }
     done
     if ${pkgs.gnugrep}/bin/grep -q 'share/quark-de/sway/config' check.log; then

@@ -28,6 +28,7 @@ pkgbase = quark-de-git
 	optdepends = jq: window screenshots
 	optdepends = dex: autostart apps without systemd xdg-desktop-autostart.target
 	optdepends = polkit-gnome: password prompts for admin actions
+	optdepends = socat: sway IPC bridge so Quark can switch workspaces (quark-de-ctl)
 	provides = quark-de
 	conflicts = quark-de
 	source = git+https://github.com/autobutler-org/quark-de.git

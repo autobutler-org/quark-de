@@ -27,6 +27,7 @@
   gawk,
   gnutar,
   procps,
+  socat,
 }:
 
 # The session's own tools go after the user's PATH (--suffix), so a sway or
@@ -58,6 +59,7 @@ let
     gawk
     gnutar
     procps
+    socat
   ];
 in
 stdenvNoCC.mkDerivation {

@@ -30,6 +30,7 @@ optdepends=(
 	'jq: window screenshots'
 	'dex: autostart apps without systemd xdg-desktop-autostart.target'
 	'polkit-gnome: password prompts for admin actions'
+	'socat: sway IPC bridge so Quark can switch workspaces (quark-de-ctl)'
 )
 provides=("$_pkgname")
 conflicts=("$_pkgname")
