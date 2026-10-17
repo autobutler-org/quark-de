@@ -137,6 +137,9 @@ The session sets `XDG_CURRENT_DESKTOP=Quark:sway`, and `make install` puts `quar
 `$PREFIX/share/xdg-desktop-portal/`: screen sharing and screenshots go to the wlr portal, everything else (file
 pickers, settings) to the gtk one.
 
+The browser starts without `SWAYSOCK` and `I3SOCK` (`quark-de-browser` unsets them), so it and the processes it
+spawns are not handed sway's IPC socket; see [SECURITY.md](SECURITY.md#trust-boundary-the-sway-ipc-socket).
+
 Using a different browser? Change the `exec quark-de-browser` line (it starts `firefox`, or `firefox-esr` when that
 is the one installed), its `assign [app_id="^firefox(-esr)?$"]` rule and the `$mod+2` binding
 (`quark-de-focus <workspace> <app_id> <command>`) in `config/sway/config` to match (`swaymsg -t get_tree | grep app_id` shows the app ID).
