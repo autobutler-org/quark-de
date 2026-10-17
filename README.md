@@ -127,6 +127,12 @@ the journal (`journalctl -t quark-de`). Without `sway` you land back at the logi
 fallback session instead: an error bar saying what to install, a Log out button, and a foot terminal. A missing
 `foot` or `firefox` is logged as a warning and the session starts anyway.
 
+Reporting a crash or a black screen? Run `quark-de --report`. It writes a tarball next to those logs and prints its
+path. It holds `session.log`, `quark.log`, the `--check` output, `swaymsg -t get_version`, `get_outputs` and
+`get_tree` (when sway is running), `journalctl --user -b -t quark-de` and `coredumpctl list quark` (when those are
+installed), with your home directory and obvious tokens and passwords scrubbed. Nothing is uploaded: look it over,
+then attach it to your issue.
+
 The session sets `XDG_CURRENT_DESKTOP=Quark:sway`, and `make install` puts `quark-portals.conf` in
 `$PREFIX/share/xdg-desktop-portal/`: screen sharing and screenshots go to the wlr portal, everything else (file
 pickers, settings) to the gtk one.

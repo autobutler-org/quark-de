@@ -1,0 +1,87 @@
+#!/bin/sh
+set -eu
+umask 077
+
+readonly state="${XDG_STATE_HOME:-${HOME:-}/.local/state}/quark-de"
+bindir="$(cd "$(dirname "$0")" && pwd)"
+readonly bindir
+stamp="$(date +%Y%m%d-%H%M%S)"
+readonly name="quark-de-report-$stamp"
+readonly tarball="$state/$name.tar.gz"
+
+work="$(mktemp -d)" || {
+	echo "quark-de: cannot create a temporary directory; check that \$TMPDIR is writable, then run 'quark-de --report' again" >&2
+	exit 1
+}
+readonly work
+trap 'rm -rf "$work"' EXIT
+readonly dir="$work/$name"
+mkdir "$dir"
+
+cat >"$work/scrub.sed" <<'SED'
+s#/home/[^/[:space:]"']+#/home/USER#g
+s/(Bearer|Basic)[[:space:]]+[A-Za-z0-9._~+\/=-]+/\1 REDACTED/Ig
+s/((token|secret|password|passwd|passphrase|api[_-]?key|access[_-]?key|private[_-]?key|authorization|cookie|session[_-]?id)["']?[[:space:]]*[=:][[:space:]]*["']?)[^"'[:space:],;&]+/\1REDACTED/Ig
+s/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/REDACTED/g
+s/(gh[pousr]_|github_pat_|glpat-|xox[abprs]-)[A-Za-z0-9_-]+/REDACTED/g
+SED
+if [ -n "${HOME:-}" ] && [ "$HOME" != / ]; then
+	home_re="$(printf '%s' "$HOME" | sed 's/[][\.*^$#+?(){}|]/\\&/g')"
+	printf 's#%s#~#g\n' "$home_re" | cat - "$work/scrub.sed" >"$work/scrub.tmp"
+	mv "$work/scrub.tmp" "$work/scrub.sed"
+fi
+
+scrub() {
+	sed -E -f "$work/scrub.sed"
+}
+
+skip() {
+	echo "$1: $2" | scrub >>"$dir/skipped.txt"
+}
+
+collect() {
+	file="$1"
+	shift
+	{ "$@" 2>&1 || :; } | scrub >"$dir/$file"
+}
+
+for log in session.log quark.log; do
+	if [ -r "$state/$log" ]; then
+		scrub <"$state/$log" >"$dir/$log"
+	else
+		skip "$log" "not found in $state"
+	fi
+done
+
+if [ -x "$bindir/quark-de" ]; then
+	collect check.txt "$bindir/quark-de" --check
+else
+	skip check.txt "$bindir/quark-de not found"
+fi
+
+if command -v swaymsg >/dev/null 2>&1 && swaymsg -t get_version >/dev/null 2>&1; then
+	for t in version outputs tree; do
+		collect "sway-$t.txt" swaymsg -t "get_$t"
+	done
+else
+	skip sway "swaymsg is missing or sway is not running"
+fi
+
+if command -v journalctl >/dev/null 2>&1; then
+	collect journal.txt journalctl --user -b -t quark-de --no-pager
+else
+	skip journal.txt "journalctl not found"
+fi
+
+if command -v coredumpctl >/dev/null 2>&1; then
+	collect coredumps.txt coredumpctl list quark --no-pager
+else
+	skip coredumps.txt "coredumpctl not found"
+fi
+
+if ! { mkdir -p "$state" && tar -czf "$tarball" -C "$work" "$name"; }; then
+	echo "quark-de: cannot write $tarball; check that $state is writable, then run 'quark-de --report' again" >&2
+	exit 1
+fi
+echo "$tarball"
+echo "quark-de: nothing was uploaded. Review the report, then attach it to your bug report." >&2

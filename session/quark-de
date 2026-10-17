@@ -8,12 +8,13 @@ readonly fallback="$share/fallback"
 
 usage() {
 	cat <<USAGE
-Usage: quark-de [--check | -h]
+Usage: quark-de [--check | --report | -h]
 
 Start the Quark desktop session (sway, with Quark as the desktop).
 Usually started by a display manager: pick "Quark" at the login screen.
 
   --check   (or doctor) list missing dependencies and how to install them
+  --report  bundle logs and session state into a local tarball and print its path
   -h        show this help
 USAGE
 }
@@ -117,6 +118,9 @@ case "${1:-}" in
 	check_portals
 	check sway quark foot firefox swayidle swaylock
 	exit
+	;;
+--report)
+	exec "$(dirname "$0")/quark-de-report"
 	;;
 "") ;;
 *)
