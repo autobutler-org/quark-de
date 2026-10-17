@@ -1,0 +1,48 @@
+# Maintainer: Autobutler <https://github.com/autobutler-org>
+
+pkgname=quark-de-git
+_pkgname=quark-de
+pkgver=r41.b8b5b45
+pkgrel=1
+pkgdesc='Wayland desktop session where the Quark app is the desktop (sway config and launcher)'
+arch=('any')
+url='https://github.com/autobutler-org/quark-de'
+license=('MIT-0')
+# quark-de --check fails without these. Quark itself is not listed: no Arch
+# package ships the Flutter app yet (the AUR 'quark' is an unrelated project),
+# and the launcher falls back to an error screen that says how to install it.
+depends=('sway' 'foot' 'swayidle' 'swaylock' 'dbus')
+makedepends=('git' 'make')
+optdepends=(
+	'firefox: browser workspace'
+	'xdg-desktop-portal-wlr: screen sharing'
+	'xdg-desktop-portal-gtk: file dialogs'
+	'mako: notifications'
+	'libnotify: on-screen volume and brightness levels'
+	'wireplumber: volume keys'
+	'brightnessctl: brightness keys'
+	'playerctl: media keys'
+	'wl-clipboard: clipboard history and copying screenshots'
+	'cliphist: clipboard history'
+	'wofi: Super+V clipboard picker'
+	'grim: screenshots'
+	'slurp: region screenshots'
+	'jq: window screenshots'
+	'dex: autostart apps without systemd xdg-desktop-autostart.target'
+	'polkit-gnome: password prompts for admin actions'
+)
+provides=("$_pkgname")
+conflicts=("$_pkgname")
+source=("git+$url.git")
+sha256sums=('SKIP')
+
+pkgver() {
+	cd "$_pkgname"
+	printf 'r%s.%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
+package() {
+	cd "$_pkgname"
+	make DESTDIR="$pkgdir" PREFIX=/usr install
+	install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
