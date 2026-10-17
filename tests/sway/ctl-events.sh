@@ -19,9 +19,13 @@ event_seen() {
 
 swaymsg -s "$quark_sock" -m -t subscribe '["workspace","window"]' >"$tmp/events" 2>&1 &
 sub=$!
-sleep 1
-swaymsg_ workspace 3:terminal >/dev/null
-wait_for 5 event_seen '"change": "focus"' || fail "no workspace event reached quark's subscription: $(cat "$tmp/events")"
+# swaymsg prints no acknowledgement, and the subscription takes a moment to reach sway on a slow runner, so switch workspaces until an event shows up.
+focus_event() {
+	swaymsg_ workspace 1:quark >/dev/null
+	swaymsg_ workspace 3:terminal >/dev/null
+	event_seen '"change": "focus"'
+}
+wait_for 10 focus_event || fail "no workspace event reached quark's subscription: $(cat "$tmp/events")"
 app_kill foot
 wait_for 5 event_seen '"change": "close"' || fail "no window close event reached quark's subscription: $(cat "$tmp/events")"
 kill "$sub" 2>/dev/null || :

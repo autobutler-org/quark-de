@@ -30,6 +30,7 @@ Recommends: mako-notifier,
  playerctl,
  dex,
  lxpolkit,
+ socat,
 Description: Wayland desktop session where the Quark app is the desktop
  Quark DE is a sway configuration and a POSIX sh launcher. It adds a "Quark"
  entry to the display manager that starts sway with the Quark Flutter app
