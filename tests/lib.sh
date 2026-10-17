@@ -41,7 +41,23 @@ harness_teardown() {
 	if [ -n "${dbus_pid:-}" ]; then
 		kill "$dbus_pid" 2>/dev/null || :
 	fi
+	session_pids | xargs -r kill 2>/dev/null || :
+	wait_for 5 no_session_pids || :
 	rm -rf "$tmp"
+}
+
+session_pids() {
+	for environ in /proc/[0-9]*/environ; do
+		pid="${environ#/proc/}"
+		pid="${pid%/environ}"
+		[ "$pid" = "$$" ] && continue
+		{ tr '\0' '\n' <"$environ"; } 2>/dev/null | grep -qx "XDG_RUNTIME_DIR=$runtime" && echo "$pid"
+	done
+	return 0
+}
+
+no_session_pids() {
+	[ -z "$(session_pids)" ]
 }
 
 dbus_start() {
