@@ -53,7 +53,7 @@ dbus_start() {
 sway_env() {
 	env PATH="$tmp/shim:$tmp/usr/bin:$PATH" \
 		WLR_BACKENDS=headless WLR_LIBINPUT_NO_DEVICES=1 WLR_RENDERER=pixman \
-		XDG_RUNTIME_DIR="$runtime" XDG_STATE_HOME="$tmp/state" XDG_CACHE_HOME="$tmp/cache" "$@"
+		XDG_RUNTIME_DIR="$runtime" XDG_CONFIG_HOME="$tmp/config" XDG_STATE_HOME="$tmp/state" XDG_CACHE_HOME="$tmp/cache" "$@"
 }
 
 sway_start() {
