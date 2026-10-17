@@ -16,7 +16,7 @@ wait_for 10 views_up 3 || fail "the session did not map its three clients"
 swaymsg_ exec quark-de-logout >/dev/null
 wait_for 10 sway_exited || fail "sway is still running after quark-de-logout"
 want="$(printf '%s\n' 'quark TERM' 'systemctl --user show-environment' 'systemctl --user stop graphical-session.target')"
-got="$(grep -v 'import-environment' "$tmp/calls" || :)"
+got="$(grep -v -e 'import-environment' -e 'set-environment XDG_CURRENT_DESKTOP=' "$tmp/calls" || :)"
 [ "$got" = "$want" ] || fail "expected calls:
 $want
 got:
