@@ -86,6 +86,31 @@ log() {
 	fi
 }
 
+check_runtime_dir() {
+	dir="${XDG_RUNTIME_DIR:-}"
+	if [ -z "$dir" ]; then
+		log "error: XDG_RUNTIME_DIR is not set, so sway cannot start — log in through the display manager (or a TTY login with systemd-logind and pam_systemd), not su or sudo, then try again."
+		exit 1
+	fi
+	if [ ! -d "$dir" ]; then
+		log "error: XDG_RUNTIME_DIR=$dir does not exist, so sway cannot start — log out and log in again so systemd-logind creates it."
+		exit 1
+	fi
+	# shellcheck disable=SC2012,SC2046
+	set -- $(ls -ldn "$dir")
+	if [ "$3" != "$(id -u)" ]; then
+		log "error: XDG_RUNTIME_DIR=$dir belongs to uid $3, not you (uid $(id -u)), so sway cannot start — log in as yourself through the display manager instead of su or sudo, then try again."
+		exit 1
+	fi
+	case "$1" in
+	drwx------*) ;;
+	*)
+		log "error: XDG_RUNTIME_DIR=$dir has mode $1, not 0700, so sway refuses it — run 'chmod 0700 $dir', then log in again."
+		exit 1
+		;;
+	esac
+}
+
 need_file() {
 	if [ ! -r "$1" ]; then
 		log "error: $1 is missing — run 'make install' from the quark-de repository, then log in again."
@@ -147,6 +172,7 @@ if ! command -v sway >/dev/null 2>&1; then
 	exit 1
 fi
 warn_optional | grep '^warning' >&2 || :
+check_runtime_dir
 
 if ! command -v quark >/dev/null 2>&1; then
 	need_file "$fallback"

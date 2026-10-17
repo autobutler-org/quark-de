@@ -8,7 +8,7 @@ harness_setup
 printf '#!/bin/sh\nenv\n' >"$tmp/shim/sway"
 chmod +x "$tmp/shim/sway"
 
-env -u XDG_CURRENT_DESKTOP -u XDG_SESSION_DESKTOP PATH="$tmp/shim:$PATH" \
+env -u XDG_CURRENT_DESKTOP -u XDG_SESSION_DESKTOP PATH="$tmp/shim:$PATH" XDG_RUNTIME_DIR="$runtime" \
 	"$tmp/usr/bin/quark-de" >"$tmp/env" 2>"$tmp/err" ||
 	fail "quark-de did not reach sway: $(cat "$tmp/err")"
 

@@ -11,7 +11,7 @@ fail() {
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-make -s -C "$repo" install DESTDIR="$tmp" PREFIX=/usr >/dev/null
+make -s -C "$repo" install PREFIX="$tmp/usr" WAYLAND_SESSIONS="$tmp/wayland-sessions" >/dev/null
 mkdir "$tmp/bin"
 for cmd in sway quark foot firefox swayidle swaylock; do
 	printf '#!/bin/sh\n' >"$tmp/bin/$cmd"

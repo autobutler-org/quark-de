@@ -16,8 +16,11 @@ make -s -C "$repo" install DESTDIR="$root" PREFIX=/usr >/dev/null
 [ -f "$desktop" ] || fail "make install did not install $desktop"
 grep -qx 'Exec=/usr/bin/quark-de' "$desktop" ||
 	fail "make install did not rewrite Exec= to /usr/bin/quark-de: $(grep '^Exec=' "$desktop")"
+grep -qx 'share="/usr/share/quark-de/sway"' "$launcher" ||
+	fail "make install did not bake PREFIX into the launcher: $(grep '^share=' "$launcher")"
 
-"$launcher" --check >"$tmp/check.log" 2>&1 || :
+make -s -C "$repo" install PREFIX="$tmp/prefix" WAYLAND_SESSIONS="$tmp/wayland-sessions" >/dev/null
+"$tmp/prefix/bin/quark-de" --check >"$tmp/check.log" 2>&1 || :
 grep -Eq '^(ok|missing) +sway( |$)' "$tmp/check.log" || fail "quark-de --check did not run its checks: $(cat "$tmp/check.log")"
 if grep -q '^missing  /' "$tmp/check.log"; then
 	fail "quark-de --check did not find the installed config: $(cat "$tmp/check.log")"

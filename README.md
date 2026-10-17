@@ -125,7 +125,12 @@ Log out, pick **Quark** at the login screen. `sudo make uninstall` removes it.
 If the session can't start, it says why in `~/.local/state/quark-de/session.log` (`$XDG_STATE_HOME` if set) and in
 the journal (`journalctl -t quark-de`). Without `sway` you land back at the login screen. Without `quark` you get a
 fallback session instead: an error bar saying what to install, a Log out button, and a foot terminal. A missing
-`foot` or `firefox` is logged as a warning and the session starts anyway.
+`foot` or `firefox` is logged as a warning and the session starts anyway. The session also refuses to start, and
+says how to fix it, when `XDG_RUNTIME_DIR` is unset, missing, owned by someone else or not mode 0700 (started from
+`su` or `sudo`, say).
+
+`make install` writes the install prefix into the installed `quark-de`, so a symlink to it (in `~/.local/bin`, say)
+still finds the config.
 
 Reporting a crash or a black screen? Run `quark-de --report`. It writes a tarball next to those logs and prints its
 path. It holds `session.log`, `quark.log`, the `--check` output, `swaymsg -t get_version`, `get_outputs` and
