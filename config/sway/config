@@ -32,6 +32,7 @@ exec swayidle -w timeout 300 'swaylock -f' timeout 600 'swaymsg "output * power 
 exec wl-paste --watch quark-de-clipboard store
 exec mako --config $share/mako/config
 exec quark-de-autostart
+exec quark-de-polkit
 
 # The first workspace bound below is the one sway starts on.
 bindsym $mod+1 workspace $quark

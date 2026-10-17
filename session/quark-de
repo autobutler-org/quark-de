@@ -35,6 +35,7 @@ hint() {
 	brightnessctl) echo "sudo apt install brightnessctl (brightness keys stay dead without it)" ;;
 	playerctl) echo "sudo apt install playerctl (play, pause, next and previous keys stay dead without it)" ;;
 	notify-send) echo "sudo apt install libnotify-bin (keys work, but no on-screen level)" ;;
+	polkit-agent) echo "sudo apt install lxpolkit (without a polkit agent, mounting disks and other admin actions fail without a password prompt)" ;;
 	esac
 }
 
@@ -54,6 +55,11 @@ warn_optional() {
 			echo "warning  $cmd — $(hint "$cmd")"
 		fi
 	done
+	if "$(dirname "$0")/quark-de-polkit" --find >/dev/null 2>&1; then
+		echo "ok       polkit-agent"
+	else
+		echo "warning  polkit-agent — $(hint polkit-agent)"
+	fi
 }
 
 # check <command>...: report missing commands; fail if any are missing.
