@@ -58,7 +58,7 @@ bindsym $mod+d exec quark-de-dnd
 bindsym Print exec quark-de-screenshot full
 bindsym Shift+Print exec quark-de-screenshot region
 bindsym $mod+Print exec quark-de-screenshot window
-bindsym $mod+Shift+e exec swaynag -t warning -m 'Log out of Quark?' -B 'Log out' 'swaymsg exit'
+bindsym $mod+Shift+e exec swaynag -t warning -m 'Log out of Quark?' -B 'Log out' 'quark-de-logout' -Z 'Lock' 'swaylock -f' -B 'Power off' 'quark-de-logout poweroff' -B 'Reboot' 'quark-de-logout reboot'
 
 bindsym --locked XF86AudioRaiseVolume exec quark-de-osd volume-up
 bindsym --locked XF86AudioLowerVolume exec quark-de-osd volume-down
