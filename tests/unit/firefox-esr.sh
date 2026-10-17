@@ -7,8 +7,7 @@ doctor() {
 	env -i HOME="$tmp/home" PATH="$bin" /bin/sh "$tmp/usr/bin/quark-de" --check >"$tmp/out.log" 2>&1
 }
 
-unit_setup
-make -s -C "$repo" install PREFIX="$tmp/usr" WAYLAND_SESSIONS="$tmp/wayland-sessions" >/dev/null
+harness_setup
 
 stub_bin sway quark foot firefox-esr swayidle swaylock logger
 doctor || fail "quark-de --check failed with firefox-esr in place of firefox: $(cat "$tmp/out.log")"

@@ -5,14 +5,16 @@ set -eu
 
 unit_setup
 readonly launcher="$tmp/root/usr/bin/quark-de"
-make -s -C "$repo" install DESTDIR="$tmp/root" PREFIX=/usr >/dev/null
-ln -s "$(command -v dirname)" "$tmp/shim/dirname"
-ln -s "$(command -v cat)" "$tmp/shim/cat"
+make -s -C "$repo" install PREFIX="$tmp/root/usr" WAYLAND_SESSIONS="$tmp/root/wayland-sessions" >/dev/null
+for tool in dirname cat ls id; do
+	ln -s "$(command -v "$tool")" "$tmp/shim/$tool"
+done
+mkdir -m 700 "$tmp/run"
 stub sway "echo \"\$*\" >'$tmp/sway.ran'"
 
 run() {
 	status=0
-	env PATH="$tmp/shim" "$launcher" "$@" >"$tmp/out" 2>"$tmp/err" || status=$?
+	env PATH="$tmp/shim" XDG_RUNTIME_DIR="$tmp/run" "$launcher" "$@" >"$tmp/out" 2>"$tmp/err" || status=$?
 }
 
 run -h

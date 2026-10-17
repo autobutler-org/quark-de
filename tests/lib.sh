@@ -110,7 +110,7 @@ focused_workspace() {
 stub_bin() {
 	bin="$tmp/bin"
 	mkdir -p "$bin"
-	for tool in dirname mkdir date; do
+	for tool in dirname mkdir date ls id; do
 		ln -s "$(command -v "$tool")" "$bin/$tool"
 	done
 	for name in "$@"; do
@@ -120,5 +120,5 @@ stub_bin() {
 }
 
 run_session() {
-	env -i HOME="$tmp/home" PATH="$bin" "$@" /bin/sh "$tmp/usr/bin/quark-de" >"$tmp/out.log" 2>&1
+	env -i HOME="$tmp/home" PATH="$bin" XDG_RUNTIME_DIR="$runtime" "$@" /bin/sh "$tmp/usr/bin/quark-de" >"$tmp/out.log" 2>&1
 }

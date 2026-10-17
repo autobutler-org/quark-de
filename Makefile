@@ -14,7 +14,8 @@ help:
 
 install:
 	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/share/quark-de/sway $(DESTDIR)$(PREFIX)/share/quark-de/mako $(DESTDIR)$(PREFIX)/share/xdg-desktop-portal $(DESTDIR)$(WAYLAND_SESSIONS)
-	install -m755 session/quark-de $(DESTDIR)$(PREFIX)/bin/quark-de
+	sed 's|^share=.*|share="$(PREFIX)/share/quark-de/sway"|' session/quark-de > $(DESTDIR)$(PREFIX)/bin/quark-de
+	chmod 755 $(DESTDIR)$(PREFIX)/bin/quark-de
 	install -m755 $(HELPERS) $(DESTDIR)$(PREFIX)/bin/
 	sed 's|^set $$share .*|set $$share $(PREFIX)/share/quark-de|' config/sway/config > $(DESTDIR)$(PREFIX)/share/quark-de/sway/config
 	install -m644 config/mako/config $(DESTDIR)$(PREFIX)/share/quark-de/mako/config
