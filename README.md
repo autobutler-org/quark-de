@@ -216,6 +216,9 @@ Optional, for screenshots: `grim`, `slurp`, and `wl-copy` (from `wl-clipboard`).
 
 Optional: `dex`, which starts your startup apps when there is no systemd user session.
 
+Optional: `socat`, for the `quark-de-ctl` bridge that lets Quark switch workspaces and launch apps. Without it Quark
+runs with no sway IPC at all.
+
 Optional: a polkit agent (`lxpolkit`, `policykit-1-gnome` or `polkit-kde-agent-1`) for admin password prompts.
 
 ```bash
@@ -225,6 +228,7 @@ sudo apt install wl-clipboard cliphist wofi   # optional: clipboard history
 sudo apt install grim slurp wl-clipboard   # optional: screenshots
 sudo apt install dex   # optional: startup apps without systemd
 sudo apt install lxpolkit   # optional: admin password prompts
+sudo apt install socat   # optional: Quark drives workspaces (quark-de-ctl)
 sudo make install          # PREFIX=/usr/local by default; DESTDIR is honored
 quark-de --check           # lists anything still missing and how to get it
 ```
@@ -258,10 +262,15 @@ Using a different browser? Change the `exec quark-de-browser` line (it starts `f
 is the one installed), its `assign [app_id="^firefox(-esr)?$"]` rule and the `$mod+2` binding
 (`quark-de-focus <workspace> <app_id> <command>`) in `config/sway/config` to match (`swaymsg -t get_tree | grep app_id` shows the app ID).
 
+Quark never gets sway's own IPC socket. `quark-de-ctl guard` starts it with an allowlisting socket as its
+`SWAYSOCK`; `quark-de-ctl -h` lists what Quark may send there (`workspace 2:browser`, `launch terminal`,
+`open-url <url>`, `lock`, `logout`, `poweroff`, a few read-only queries and workspace/window events). Anything else,
+`exec`, `exit`, `reload` and chained commands included, is rejected.
+
 ## Roadmap
 
-- Quark drives the workspaces itself (a "Browser" / "Terminal" button calling `swaymsg workspace …`), so the
-  keybinds become a fallback instead of the only way to switch.
+- Quark drives the workspaces itself (a "Browser" / "Terminal" button sending `workspace 2:browser` through
+  `quark-de-ctl`), so the keybinds become a fallback instead of the only way to switch.
 
 ## Contributing
 

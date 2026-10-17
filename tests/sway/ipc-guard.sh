@@ -1,18 +1,10 @@
 #!/bin/sh
-# @pending #17: Quark has no IPC guard yet, so it holds the raw sway socket and this test fails.
-# Delete the skip below when the guard lands. QUARK_DE_PENDING=1 runs it now.
-#
-# Quark's IPC path is the SWAYSOCK in Quark's environment. The guard (a restricted socket or an
+# Quark's IPC path is the SWAYSOCK in Quark's environment. The guard (quark-de-ctl guard, an
 # allowlisting proxy) puts its own socket there. Known limit: other processes running as the same
 # user can still reach the raw sway socket; this test covers only what Quark is handed.
 set -eu
 # shellcheck source=tests/lib.sh
 . "$(dirname "$0")/../lib.sh"
-
-if [ "${QUARK_DE_PENDING:-}" != 1 ]; then
-	echo "skip ipc guard blocks arbitrary sway commands (@pending #17; QUARK_DE_PENDING=1 runs it)"
-	exit 0
-fi
 
 harness_setup
 sway_start
