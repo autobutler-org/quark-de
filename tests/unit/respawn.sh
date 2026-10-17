@@ -16,7 +16,7 @@ case_setup() {
 	dir="$tmp/$1"
 	mkdir -p "$dir/bin" "$dir/state"
 	stub swaynag "printf '%s\n' \"\$@\" >'$dir/nag'"
-	stub swaymsg "echo \"\$*\" >>'$dir/swaymsg'"
+	stub swaymsg "[ \"\$*\" = '-t get_version' ] || echo \"\$*\" >>'$dir/swaymsg'"
 }
 
 respawn() {
@@ -68,3 +68,16 @@ wait_for 15 exited || {
 grep -qF 'quark: libfoo.so.1 not found' "$dir/state/quark-de/quark.log" ||
 	fail "stderr: quark's stderr is not in the log"
 echo "ok  respawn appends quark's stderr to the log"
+
+case_setup sway-gone
+stub quark "echo run >>'$dir/runs'; exit 1"
+stub swaymsg "[ \"\$*\" != '-t get_version' ] || exit 1"
+respawn
+wait_for 5 exited || {
+	kill "$respawn_pid"
+	fail "sway-gone: still looping after $(runs) runs"
+}
+[ "$(runs)" -eq 1 ] || fail "sway-gone: expected 1 run before stopping, got $(runs)"
+[ ! -e "$dir/nag" ] || fail "sway-gone: swaynag was called: $(cat "$dir/nag")"
+grep -qF 'sway is gone' "$dir/state/quark-de/quark.log" || fail "sway-gone: the stop was not logged"
+echo "ok  respawn stops once sway is gone"

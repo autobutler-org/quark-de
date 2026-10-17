@@ -32,6 +32,10 @@ while :; do
 	status=$?
 	now=$(date +%s)
 	echo "quark-de: quark exited with status $status at $(date)" >>"$log"
+	swaymsg -t get_version >/dev/null 2>&1 || {
+		echo "quark-de: sway is gone, not restarting quark" >>"$log"
+		exit 0
+	}
 	recent="$now"
 	count=1
 	for t in $exits; do
