@@ -67,6 +67,27 @@ close lock before sleeping. A fullscreen browser or other app (a video, say) kee
 does not, because it is always fullscreen. Without `swayidle` or `swaylock` the session still starts, just without
 locking.
 
+## Keyboard layout and input methods
+
+At login, `quark-de-keyboard` applies the system keyboard layout to every keyboard: `XKBLAYOUT`, `XKBVARIANT`,
+`XKBOPTIONS` and `XKBMODEL` from `/etc/default/keyboard`, or the `X11 Layout`/`Variant`/`Options`/`Model` lines of
+`localectl status` where that file does not exist. Set it with `sudo localectl set-x11-keymap de pc105 nodeadkeys`
+(or `sudo dpkg-reconfigure keyboard-configuration` on Debian), then log in again. If nothing is configured, sway's
+default (US) is left alone. A layout sway cannot compile is written to stderr with the fix, and the keyboard stays US.
+
+The layout is set before swaylock first runs, so a lock-screen password with non-ASCII characters (`ä`, `é`) types
+the same as at the login screen.
+
+The session does not install an input method. For Chinese, Japanese, Korean and other composed input, install
+[fcitx5](https://fcitx-im.org) (or ibus) and start it from sway, for example in a file under `/etc/sway/config.d/`:
+
+```text
+exec fcitx5 -d --replace
+```
+
+Quark and other Wayland apps get input through the `text-input-v3` protocol, which sway supports; GTK apps that do
+not speak it need `GTK_IM_MODULE=fcitx` (or `ibus`) in their environment.
+
 ## Clipboard
 
 Everything you copy is kept in a [cliphist](https://github.com/sentriz/cliphist) history. On Wayland the clipboard
