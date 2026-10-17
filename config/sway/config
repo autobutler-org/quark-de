@@ -47,7 +47,7 @@ exec quark-de-polkit
 bindsym $mod+1 workspace $quark
 bindsym $mod+2 exec quark-de-focus $browser 'firefox(-esr)?' quark-de-browser
 bindsym $mod+3 exec quark-de-focus $terminal foot foot
-bindsym $mod+Tab workspace $quark
+bindsym $mod+Tab workspace back_and_forth
 bindsym $mod+slash exec quark-de-hint
 bindsym $mod+F1 exec quark-de-hint
 bindsym $mod+l exec swaylock -f
@@ -59,6 +59,9 @@ bindsym Print exec quark-de-screenshot full
 bindsym Shift+Print exec quark-de-screenshot region
 bindsym $mod+Print exec quark-de-screenshot window
 bindsym $mod+Shift+e exec swaynag -t warning -m 'Log out of Quark?' -B 'Log out' 'quark-de-logout' -Z 'Lock' 'swaylock -f' -B 'Power off' 'quark-de-logout poweroff' -B 'Reboot' 'quark-de-logout reboot'
+
+# Touchpad (sway >= 1.8): a 3-finger swipe down returns to Quark from anywhere.
+bindgesture swipe:3:down workspace $quark
 
 bindsym --locked XF86AudioRaiseVolume exec quark-de-osd volume-up
 bindsym --locked XF86AudioLowerVolume exec quark-de-osd volume-down

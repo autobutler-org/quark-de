@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-readonly message='Quark keys: Super+2 browser · Super+3 terminal · Super+Tab or Super+1 back to Quark · Super+Shift+E log out · Super+/ or Super+F1 shows this again'
+readonly message='Quark keys: Super+2 browser · Super+3 terminal · Super+1 back to Quark · Super+Tab toggles Quark and the last workspace · 3-finger swipe down back to Quark · Super+Shift+E log out · Super+/ or Super+F1 shows this again'
 readonly marker="${XDG_STATE_HOME:-$HOME/.local/state}/quark-de/first-login-hint-shown"
 
 usage() {
