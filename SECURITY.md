@@ -63,17 +63,18 @@ What Quark DE does about it:
   ext-session-lock protocol: an IPC client cannot dismiss it, and no key binding that acts on the session may be
   `--locked`.
 
-Rules for a future Quark IPC bridge (the roadmap item where Quark switches workspaces itself):
+- Quark never gets the raw socket. `quark-de-ctl guard` hands it an allowlisting socket as `SWAYSOCK`
+  (`$XDG_RUNTIME_DIR/quark-de-ctl.<pid>.sock`, mode 0600). Each request is matched against a fixed table
+  (`quark-de-ctl -h`) and mapped to a fixed action; Quark's text never reaches sway, so `exec`, `exit`, `reload`
+  and `;` or `,` chains are rejected. Other apps still have the raw socket, so treat the bridge as defense in
+  depth too.
 
-- Send only a fixed allowlist of commands, such as `workspace 1:quark`, `workspace 2:browser` and
-  `workspace 3:terminal`, chosen from a table, never built from strings.
-- No string interpolation: no text from a user, a file, the network or a plugin ever reaches a sway IPC command.
-- Prefer a small broker that holds the socket and exposes only that allowlist, so Quark itself never gets raw
-  `SWAYSOCK`. Other apps still have the raw socket, so treat the broker as defense in depth too.
+Rules for the bridge: add a command only as a new fixed entry in that table, and never build a sway command from
+text a user, a file, the network or a plugin supplied.
 
-Not done here, and tracked as follow-ups: the broker and its allowlist, and running network-facing services (such
-as the Quark backend) under a separate UID from the desktop user. Until those exist, an RCE in anything running as
-the desktop user is full control of the session.
+Not done here, and tracked as a follow-up: running network-facing services (such as the Quark backend) under a
+separate UID from the desktop user. Until that exists, an RCE in anything running as the desktop user is full
+control of the session.
 
 ## Out of scope
 
