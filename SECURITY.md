@@ -42,6 +42,39 @@ That last one matters most. Quark's entire premise is that your data stays in yo
 contradicts that — a request to a third party, telemetry, a file leaving the device — report it as a vulnerability even
 if nothing is technically "exploitable."
 
+## Trust boundary: the sway IPC socket
+
+sway listens on an IPC socket (`$SWAYSOCK`, also exported as `$I3SOCK`) in `$XDG_RUNTIME_DIR`. Any process running
+as the desktop user can connect to it and send any command: `exec` a program, `exit` the session, rebind keys,
+reconfigure inputs and outputs. sway has no per-client IPC policy; the i3-style `ipc` and `security` blocks were
+removed in sway 1.0, so there is nothing in the config to restrict it.
+
+**Same UID means full session control.** The socket's owner and the `0700` runtime directory keep other users out,
+and that is the only boundary. A compromised process running as the desktop user (a browser exploit, a malicious
+Quark plugin, a dependency of Quark) can drive the whole session.
+
+What Quark DE does about it:
+
+- The browser starts without `SWAYSOCK` and `I3SOCK` in its environment, both at login and when Super+2 relaunches
+  it, so the browser and the processes it spawns are not handed the socket path. This is defense in depth, not a
+  boundary: a process running as the same user can still find the socket in `$XDG_RUNTIME_DIR`. A sandboxed browser
+  (Flatpak, snap) cannot.
+- `bindsym --locked` is used only for media and brightness keys. Locking is `swaylock`, which uses the
+  ext-session-lock protocol: an IPC client cannot dismiss it, and no key binding that acts on the session may be
+  `--locked`.
+
+Rules for a future Quark IPC bridge (the roadmap item where Quark switches workspaces itself):
+
+- Send only a fixed allowlist of commands, such as `workspace 1:quark`, `workspace 2:browser` and
+  `workspace 3:terminal`, chosen from a table, never built from strings.
+- No string interpolation: no text from a user, a file, the network or a plugin ever reaches a sway IPC command.
+- Prefer a small broker that holds the socket and exposes only that allowlist, so Quark itself never gets raw
+  `SWAYSOCK`. Other apps still have the raw socket, so treat the broker as defense in depth too.
+
+Not done here, and tracked as follow-ups: the broker and its allowlist, and running network-facing services (such
+as the Quark backend) under a separate UID from the desktop user. Until those exist, an RCE in anything running as
+the desktop user is full control of the session.
+
 ## Out of scope
 
 - Attacks requiring physical access to an unlocked device. The threat model assumes the box is in your home; if someone
