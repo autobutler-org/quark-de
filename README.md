@@ -92,6 +92,20 @@ Apps in `~/.config/autostart/*.desktop` and `/etc/xdg/autostart/` start at login
 starts `xdg-desktop-autostart.target`; without one it runs `dex -a`. If an app fails to start, you get a
 notification saying which one and how to find out why.
 
+## Admin password prompts
+
+Mounting a USB disk, changing the network or installing updates asks for your password through
+[polkit](https://github.com/polkit-org/polkit). sway ships no polkit agent, so `quark-de-polkit` starts the first one
+it finds of `polkit-gnome-authentication-agent-1`, `lxpolkit` and `polkit-kde-authentication-agent-1`, looking in
+`PATH` and the distro libexec directories they install to. Without one those actions fail with no prompt;
+`quark-de --check` warns about it.
+
+Quark asks for privileges through polkit and never shows a password prompt of its own. A password dialog drawn by an
+app is indistinguishable from a phishing one; the polkit agent is the only thing in the session that should ever ask.
+
+Which actions need no password (udisks2 rules, for example) is left to your distro's polkit policy; Quark DE installs
+no rules.
+
 ## Install
 
 Dependencies: `sway`, `foot`, `firefox` (or `firefox-esr`, Debian's default), `swayidle`, `swaylock`, `mako`
@@ -110,12 +124,15 @@ Optional, for screenshots: `grim`, `slurp`, and `wl-copy` (from `wl-clipboard`).
 
 Optional: `dex`, which starts your startup apps when there is no systemd user session.
 
+Optional: a polkit agent (`lxpolkit`, `policykit-1-gnome` or `polkit-kde-agent-1`) for admin password prompts.
+
 ```bash
 sudo apt install sway foot firefox swayidle swaylock mako-notifier xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
 sudo apt install wireplumber brightnessctl playerctl libnotify-bin   # optional
 sudo apt install wl-clipboard cliphist wofi   # optional: clipboard history
 sudo apt install grim slurp wl-clipboard   # optional: screenshots
 sudo apt install dex   # optional: startup apps without systemd
+sudo apt install lxpolkit   # optional: admin password prompts
 sudo make install          # PREFIX=/usr/local by default; DESTDIR is honored
 quark-de --check           # lists anything still missing and how to get it
 ```

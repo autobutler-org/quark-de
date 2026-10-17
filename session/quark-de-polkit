@@ -1,0 +1,31 @@
+#!/bin/sh
+set -u
+
+readonly agents="polkit-gnome-authentication-agent-1 lxpolkit polkit-kde-authentication-agent-1"
+readonly libexec_dirs="/usr/libexec /usr/lib/policykit-1-gnome /usr/lib/polkit-gnome /usr/lib/polkit-kde /usr/lib/lxpolkit /usr/lib/*/libexec /usr/lib"
+
+find_agent() {
+	for agent in $agents; do
+		if command -v "$agent" 2>/dev/null; then
+			return 0
+		fi
+		for dir in $libexec_dirs; do
+			if [ -f "$dir/$agent" ] && [ -x "$dir/$agent" ]; then
+				echo "$dir/$agent"
+				return 0
+			fi
+		done
+	done
+	return 1
+}
+
+if [ "${1:-}" = --find ]; then
+	find_agent
+	exit
+fi
+
+if ! agent="$(find_agent)"; then
+	echo "quark-de-polkit: no polkit authentication agent found, so mounting disks and other admin actions fail without asking for a password. Install one (sudo apt install lxpolkit), then log in again." >&2
+	exit 1
+fi
+exec "$agent"
