@@ -267,6 +267,67 @@ Quark never gets sway's own IPC socket. `quark-de-ctl guard` starts it with an a
 `open-url <url>`, `lock`, `logout`, `poweroff`, a few read-only queries and workspace/window events). Anything else,
 `exec`, `exit`, `reload` and chained commands included, is rejected.
 
+## Packages
+
+Packaging for four distros lives under `packaging/` (and `flake.nix`). None of them packages the Quark app: install
+the Quark Linux app from the [Quark releases](https://github.com/autobutler-org/quark/releases) and put `quark` on
+`PATH`. Without it you get the fallback session described under [Install](#install). Each package installs through
+the repo's `make install`.
+
+| Distro          | Where                         | Status                                  |
+| --------------- | ----------------------------- | --------------------------------------- |
+| Debian / Ubuntu | `packaging/deb`               | untested: never built                   |
+| Fedora (rpm)    | `packaging/rpm/quark-de.spec` | untested: never built                   |
+| Arch            | `packaging/arch/PKGBUILD`     | built with `makepkg -fd` only           |
+| Nix / NixOS     | `flake.nix`, `packaging/nix`  | `nix flake check` passes                |
+
+**Debian / Ubuntu.** From the repo root, with `build-essential` and `debhelper` installed:
+
+```bash
+ln -s packaging/deb/debian debian
+dpkg-buildpackage -us -uc -b
+rm debian
+```
+
+The `.deb` lands in the parent directory. It depends on `sway`, `foot`, `firefox-esr | firefox`, `swayidle`,
+`swaylock` and the three `xdg-desktop-portal` packages (`xdg-desktop-portal`, `-wlr`, `-gtk`), and recommends the
+optional tools listed under [Install](#install).
+
+**Fedora (rpm).** `packaging/rpm/quark-de.spec` is a noarch spec for version 0.1.0 whose `Source0` is the
+`v0.1.0` tag archive on GitHub. Put that tarball in your rpmbuild `SOURCES` and run `rpmbuild -ba` on the spec. It
+requires `sway`, `foot`, `firefox`, `swayidle`, `swaylock`, `jq`, the three portal packages, and the optional tools
+as hard requirements (`mako`, `wireplumber`, `brightnessctl`, `playerctl`, `libnotify`, `wl-clipboard`, `cliphist`,
+`wofi`, `grim`, `slurp`, `dex-autostart`, `lxpolkit`).
+
+**Arch.** `quark-de-git` builds from the latest `main` of this repo:
+
+```bash
+cd packaging/arch
+makepkg -si
+```
+
+It depends on `sway`, `foot`, `swayidle`, `swaylock` and `dbus`; `git` and `make` are needed to build. Firefox, the
+portals, `mako` and the other tools are optional dependencies, which `pacman` lists after install. `makepkg -fd`
+(which skips the dependency check) is the only build done; installing it is untested.
+
+**Nix / NixOS.** The flake provides `packages.<system>.quark-de` (also `default`) for `x86_64-linux` and
+`aarch64-linux`, and a NixOS module:
+
+```nix
+{
+  inputs.quark-de.url = "github:autobutler-org/quark-de";
+  # in your NixOS configuration:
+  imports = [ inputs.quark-de.nixosModules.default ];
+  services.quark-de.enable = true;
+}
+```
+
+`services.quark-de.enable` turns on `programs.sway`, `programs.firefox` (as a default you can override), the
+xdg-desktop-portal wlr and gtk portals, and registers the "Quark" session. Setting `services.quark-de.autologin.user`
+also logs that user straight into the session through greetd, with `tuigreet` shown after logout. The package wraps
+the launcher with sway, foot, swayidle, swaylock, mako and the optional tools on `PATH`, and does not bundle Quark or
+Firefox: provide `quark` yourself. Only `nix flake check` has been run.
+
 ## Roadmap
 
 - Quark drives the workspaces itself (a "Browser" / "Terminal" button sending `workspace 2:browser` through
