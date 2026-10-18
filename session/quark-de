@@ -190,5 +190,7 @@ if ! command -v quark >/dev/null 2>&1; then
 fi
 
 need_file "$config"
+# The XDG base directory default; AppImages prepend to it, and without /usr/share GTK cannot find the MIME database.
+export XDG_DATA_DIRS="${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 export XDG_CURRENT_DESKTOP=Quark:sway XDG_SESSION_DESKTOP=quark-de
 exec sway --config "$config"
