@@ -50,5 +50,5 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
-      - run: sudo apt-get update && sudo apt-get install -y sway foot jq swayidle swaylock wl-clipboard cliphist mako-notifier libnotify-bin grim wtype
+      - run: sudo apt-get update && sudo apt-get install -y sway foot jq swayidle swaylock wl-clipboard cliphist mako-notifier libnotify-bin grim wtype socat
       - run: make test

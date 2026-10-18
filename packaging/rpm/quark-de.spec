@@ -30,6 +30,8 @@ Requires:       grim
 Requires:       slurp
 Requires:       dex-autostart
 Requires:       lxpolkit
+# Weak dependency: without socat, quark-de-ctl gives Quark no sway IPC.
+Recommends:     socat
 # The Quark Flutter app is not packaged yet: install it from
 # https://github.com/autobutler-org/quark/releases and put `quark` on PATH.
 # Without it the session starts a fallback desktop that says so.

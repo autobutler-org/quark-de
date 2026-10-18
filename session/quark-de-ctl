@@ -1,0 +1,204 @@
+#!/bin/sh
+# quark-de-ctl: the only way Quark drives the session. `guard` hands Quark an allowlisting i3-ipc socket
+# as its SWAYSOCK; each connection runs `serve`, which maps allowlisted requests to fixed actions and
+# never passes Quark's text on to sway.
+set -eu
+
+readonly self="$0"
+readonly max_payload=4096
+
+usage() {
+	cat <<USAGE
+Usage: quark-de-ctl <command>
+       quark-de-ctl guard <program> [args...]
+
+Commands (contract v1; Quark sends the same words as an i3-ipc RUN_COMMAND on its SWAYSOCK):
+  workspace 1:quark|2:browser|3:terminal   switch workspace
+  launch browser|terminal                  switch to the app's workspace, starting it if it is not running
+  open-url <http(s) URL>                   open the URL in the browser and switch to 2:browser
+  lock | logout | poweroff                 lock the screen, log out, power off
+
+Queries Quark may send on its socket: get_workspaces, get_tree, get_version, and
+subscribe to ["workspace","window"] events. Everything else is rejected.
+Outside a quark-de session (no SWAYSOCK) the commands do nothing and exit 0.
+USAGE
+}
+
+reject() {
+	echo "quark-de-ctl: $*; run 'quark-de-ctl -h' for the allowed commands" >&2
+	return 2
+}
+
+# check <command> [args...]: succeed only for an allowlisted command.
+check() {
+	case "$#:${1:-}" in
+	2:workspace)
+		case "$2" in
+		1:quark | 2:browser | 3:terminal) ;;
+		*) reject "unknown workspace '$2'" ;;
+		esac
+		;;
+	2:launch)
+		case "$2" in
+		browser | terminal) ;;
+		*) reject "unknown app '$2'" ;;
+		esac
+		;;
+	2:open-url)
+		case "$2" in
+		http://?* | https://?*) ;;
+		*) reject "open-url takes one http:// or https:// URL, not '$2'" ;;
+		esac
+		case "$2" in
+		*[![:graph:]]*) reject "the URL has spaces or control characters; percent-encode them" ;;
+		esac
+		;;
+	1:lock | 1:logout | 1:poweroff) ;;
+	*) reject "'$*' is not an allowed command" ;;
+	esac
+}
+
+# detach <program> [args...]: start it without tying it to this process or connection.
+detach() {
+	"$@" </dev/null >/dev/null 2>&1 &
+}
+
+# act <command> [args...]: carry out a checked command against the real sway socket.
+act() {
+	case "$1" in
+	workspace) swaymsg -q workspace "$2" ;;
+	launch)
+		case "$2" in
+		browser) detach quark-de-focus 2:browser 'firefox(-esr)?' quark-de-browser ;;
+		terminal) detach quark-de-focus 3:terminal foot foot ;;
+		esac
+		;;
+	open-url)
+		detach quark-de-browser "$2"
+		swaymsg -q workspace 2:browser
+		;;
+	lock) detach swaylock -f ;;
+	logout) detach quark-de-logout ;;
+	poweroff) detach quark-de-logout poweroff ;;
+	esac
+}
+
+# le32 <n>: n as four little-endian bytes.
+le32() {
+	# shellcheck disable=SC2059
+	printf "\\$(printf %o $(($1 & 255)))\\$(printf %o $(($1 >> 8 & 255)))\\$(printf %o $(($1 >> 16 & 255)))\\$(printf %o $(($1 >> 24 & 255)))"
+}
+
+# reply <type> <payload>: write one i3-ipc message to the client.
+reply() {
+	printf i3-ipc
+	le32 "$(printf %s "$2" | wc -c)"
+	le32 "$1"
+	printf %s "$2"
+}
+
+# failure <type> <message>: sway's error reply shape for that message type.
+failure() {
+	if [ "$1" -eq 0 ]; then
+		# shellcheck disable=SC2016
+		jq -cn --arg e "$2" '[{success: false, error: $e}]'
+	else
+		# shellcheck disable=SC2016
+		jq -cn --arg e "$2" '{success: false, error: $e}'
+	fi
+}
+
+# serve: answer one client connection on stdin/stdout until it closes.
+serve() {
+	while :; do
+		# shellcheck disable=SC2046
+		set -- $(dd bs=1 count=14 2>/dev/null | od -An -v -tu1)
+		[ "$#" -eq 14 ] || exit 0
+		[ "$1 $2 $3 $4 $5 $6" = "105 51 45 105 112 99" ] || exit 0
+		len=$(($7 + ($8 << 8) + ($9 << 16) + (${10} << 24)))
+		type=$((${11} + (${12} << 8) + (${13} << 16) + (${14} << 24)))
+		[ "$len" -le "$max_payload" ] || exit 0
+		payload="$(dd bs=1 count="$len" 2>/dev/null)"
+		case "$type" in
+		0)
+			set -f
+			# shellcheck disable=SC2086
+			set -- $payload
+			set +f
+			if ! err="$(check "$@" 2>&1)"; then
+				reply 0 "$(failure 0 "${err#quark-de-ctl: }")"
+			elif ! err="$(act "$@" 2>&1)"; then
+				reply 0 "$(failure 0 "$err")"
+			else
+				reply 0 '[{"success":true}]'
+			fi
+			;;
+		1 | 4 | 7) reply "$type" "$(swaymsg -r -t "$(case "$type" in 1) echo get_workspaces ;; 4) echo get_tree ;; *) echo get_version ;; esac)")" ;;
+		2)
+			if events="$(printf %s "$payload" | jq -ce 'select(type == "array" and length > 0 and all(.[]; . == "workspace" or . == "window")) | unique' 2>/dev/null)"; then
+				# Sway answers and streams events straight to the client; anything the client sends afterwards is dropped.
+				{
+					reply 2 "$events"
+					cat >/dev/null
+				} | socat - UNIX-CONNECT:"$SWAYSOCK"
+				exit 0
+			fi
+			reply 2 "$(failure 2 'quark may subscribe only to workspace and window events')"
+			;;
+		*) reply "$type" "$(failure "$type" "message type $type is not allowed")" ;;
+		esac
+	done
+}
+
+# guard <program> [args...]: run the program with an allowlisting socket as its SWAYSOCK.
+guard() {
+	if [ ! -S "${SWAYSOCK:-}" ]; then
+		exec "$@"
+	fi
+	if ! command -v socat >/dev/null 2>&1; then
+		echo "quark-de-ctl: socat is missing, so Quark gets no sway IPC (no workspace buttons) — sudo apt install socat, then log in again" >&2
+		unset SWAYSOCK I3SOCK
+		exec "$@"
+	fi
+	sock="${XDG_RUNTIME_DIR:?}/quark-de-ctl.$$.sock"
+	socat UNIX-LISTEN:"$sock",fork,unlink-early,mode=600 EXEC:"$self serve" &
+	listener=$!
+	waited=0
+	until [ -S "$sock" ] || [ "$waited" -ge 50 ]; do
+		sleep 0.1
+		waited=$((waited + 1))
+	done
+	SWAYSOCK="$sock" I3SOCK="$sock" QUARK_DE_CTL="$sock" "$@" &
+	child=$!
+	trap 'kill -TERM "$child" 2>/dev/null' TERM INT HUP
+	status=0
+	until wait "$child"; do
+		status=$?
+		kill -0 "$child" 2>/dev/null || break
+	done
+	kill "$listener" 2>/dev/null || :
+	rm -f "$sock"
+	exit "$status"
+}
+
+case "${1:-}" in
+-h | --help | "")
+	usage
+	exit 0
+	;;
+guard)
+	shift
+	guard "$@"
+	;;
+serve) serve ;;
+esac
+
+check "$@"
+if [ -z "${SWAYSOCK:-}" ]; then
+	echo "quark-de-ctl: not in a quark-de session (SWAYSOCK is unset), so '$*' does nothing" >&2
+	exit 0
+fi
+if [ "${QUARK_DE_CTL:-}" = "$SWAYSOCK" ]; then
+	exec swaymsg -q -- "$@"
+fi
+act "$@"

@@ -29,7 +29,7 @@ restart=0
 while :; do
 	[ "$restart" = 1 ] && swaymsg workspace "$workspace" >/dev/null 2>&1
 	restart=1
-	quark >>"$log" 2>&1
+	"$(dirname "$0")/quark-de-ctl" guard quark >>"$log" 2>&1
 	status=$?
 	now=$(date +%s)
 	echo "quark-de: quark exited with status $status at $(date)" >>"$log"
