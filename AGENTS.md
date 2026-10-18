@@ -11,19 +11,34 @@ the desktop. It is a sway config plus a POSIX sh launcher; a browser and a termi
 
 ### Repo map
 
-| Path                 | What                                                       |
-| -------------------- | ---------------------------------------------------------- |
-| `session/quark-de`   | launcher: dependency checks, then `exec sway`              |
-| `session/*.desktop`  | wayland-sessions entry display managers list as "Quark"    |
-| `config/sway/config` | workspaces, app assignment, keybinds                       |
-| `Makefile`           | `install`, `uninstall`, `check`                            |
+| Path                                  | What                                                                         |
+| ------------------------------------- | ---------------------------------------------------------------------------- |
+| `session/quark-de`                    | launcher: dependency checks (`--check`, `--report`), then `exec sway`        |
+| `session/quark-de-*`                  | POSIX sh helpers the sway config and launcher call (autostart, browser, clipboard, dnd, focus, hint, keyboard, logout, osd, polkit, report, respawn, screenshot) |
+| `session/quark-de.desktop`            | wayland-sessions entry display managers list as "Quark"                      |
+| `config/sway/config`                  | workspaces, app assignment, keybinds                                         |
+| `config/sway/fallback`                | minimal sway config the launcher runs, showing an error, when `quark` is missing |
+| `config/mako/config`                  | notification daemon config                                                   |
+| `config/xdg-desktop-portal/`          | portal routing (`quark-portals.conf`)                                        |
+| `tests/run.sh`, `tests/lib.sh`        | suite runner (`sh tests/run.sh <dir>`) and shared harness/stub helpers       |
+| `tests/unit/`                         | fast tests with stubbed commands; no compositor; run by `make check`         |
+| `tests/sway/`                         | headless-sway tests against an installed copy; run by `make test`            |
+| `tests/fixtures/`                     | input files for the tests                                                    |
+| `packaging/{arch,deb,rpm,nix}/`       | Arch PKGBUILD, Debian `debian/`, RPM spec, Nix package/module/checks         |
+| `flake.nix`, `flake.lock`             | Nix flake exposing the package and NixOS module                              |
+| `Makefile`                            | `install`, `uninstall`, `check`, `test`                                      |
+| `.github/workflows/check.yml`         | CI: runs `make check` and `make test`                                        |
+
+There is no `docs/` directory; this file and `README.md` are the documentation.
 
 ## Working in this repository
 
 ### Use Makefile targets (always)
 
-Use `make check` (shellcheck) before every push, and `make install` / `make uninstall` rather than copying files
-by hand. If an action needs to be templatized, add a target.
+Use `make check` before every push, and `make install` / `make uninstall` rather than copying files by hand.
+`make check` runs shellcheck, shfmt, desktop-file-validate, actionlint and the unit tests in `tests/unit/`; it
+needs those four tools on `PATH` and prints an install hint for any that are missing. If an action needs to be
+templatized, add a target.
 
 ### Scope discipline
 
@@ -47,6 +62,10 @@ by hand. If an action needs to be templatized, add a target.
 ### Verification before claiming done
 
 - Run `make check` locally before every push.
+- Run `make test` too when you change `config/sway/`, a `session/` script or anything a headless-sway test covers.
+  It starts headless sway sessions in `tests/sway/` and needs `sway`, `foot`, `jq`, `wl-copy` (wl-clipboard),
+  `cliphist`, `mako`, `notify-send` (libnotify-bin), `dbus-daemon` and `grim`; some tests also use `swayidle`,
+  `swaylock` and `wtype`, which CI installs. CI runs both targets.
 - Report exactly what was run. Never write "verified by hand", "tested manually", or the like unless that
   verification actually happened in this session.
 - A PR or commit never carries a Claude Code session link, and all prose and new identifiers use American
@@ -54,8 +73,8 @@ by hand. If an action needs to be templatized, add a target.
 
 ### Test-driven development (preferred)
 
-Write the check first, watch it fail, then make it pass. For shell, that means a case `make check` or a
-`quark-de --check` run exercises.
+Write the check first, watch it fail, then make it pass. For shell, that means a case under `tests/unit/` (run by
+`make check`) or, when it needs a running compositor, under `tests/sway/` (run by `make test`).
 
 ### Coding conventions
 
