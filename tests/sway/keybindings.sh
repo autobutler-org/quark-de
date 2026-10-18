@@ -4,7 +4,7 @@ set -eu
 . "$(dirname "$0")/../lib.sh"
 
 # Prints one line per duplicate bindsym key, workspace target that is not one of the
-# $quark/$browser/$terminal names, or quark-de-* helper that make install does not ship.
+# $quark/$browser/$terminal names or back_and_forth, or quark-de-* helper that make install does not ship.
 binding_problems() {
 	awk -v bin="$tmp/usr/bin" '
 		function expand(s, n, parts, i, out) {
@@ -32,7 +32,7 @@ binding_problems() {
 		$1 == "bindsym" {
 			if (!targets_set) {
 				targets_set = 1
-				targets["$quark"]; targets["$browser"]; targets["$terminal"]
+				targets["$quark"]; targets["$browser"]; targets["$terminal"]; targets["back_and_forth"]
 				targets[vars["$quark"]]; targets[vars["$browser"]]; targets[vars["$terminal"]]
 			}
 			i = 2
@@ -134,8 +134,13 @@ for case in 1:1:quark 2:2:browser 3:3:terminal; do
 	key="${case%%:*}" ws="${case#*:}"
 	press "$key"
 	wait_for 5 workspace_is "$ws" || fail "Super+$key focused $(focused_workspace), not $ws"
+	[ "$ws" = 1:quark ] && continue
 	press Tab
 	wait_for 5 workspace_is 1:quark || fail "Super+Tab from $ws focused $(focused_workspace), not 1:quark"
+	press Tab
+	wait_for 5 workspace_is "$ws" || fail "a second Super+Tab focused $(focused_workspace), not $ws"
+	press 1
+	wait_for 5 workspace_is 1:quark || fail "Super+1 from $ws focused $(focused_workspace), not 1:quark"
 done
 
 nagged() {

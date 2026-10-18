@@ -21,7 +21,7 @@ shows() {
 hint XDG_STATE_HOME="$tmp/state"
 shows 1 || fail "the first login did not show the cheat sheet"
 [ -e "$tmp/state/quark-de/first-login-hint-shown" ] || fail "the first login left no marker in XDG_STATE_HOME"
-for key in 'Super+2 browser' 'Super+3 terminal' 'Super+Tab or Super+1 back to Quark' 'Super+/ or Super+F1'; do
+for key in 'Super+2 browser' 'Super+3 terminal' 'Super+1 back to Quark' 'Super+Tab toggles Quark and the last workspace' '3-finger swipe down back to Quark' 'Super+/ or Super+F1'; do
 	grep -qF "$key" "$tmp/swaynag.args" || fail "the cheat sheet does not say '$key': $(cat "$tmp/swaynag.args")"
 done
 

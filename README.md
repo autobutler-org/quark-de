@@ -34,7 +34,7 @@ out. Once sway is gone, Quark is not restarted. Quark's output is appended to
 | `Super+1`       | Quark                          |
 | `Super+2`       | browser (starts it if closed)  |
 | `Super+3`       | terminal (starts it if closed) |
-| `Super+Tab`     | back to Quark                  |
+| `Super+Tab`     | back to Quark; again to return |
 | `Super+/`       | show these keys                |
 | `Super+F1`      | show these keys                |
 | `Super+L`       | lock the screen                |
@@ -47,7 +47,8 @@ out. Once sway is gone, Quark is not restarted. Quark's output is appended to
 | `Super+Print`   | screenshot, window             |
 | `Super+Shift+E` | log out, lock, power off       |
 
-Opening a link from Quark switches to the browser; `Super+Tab` takes you back.
+Opening a link from Quark switches to the browser; `Super+Tab` takes you back, and `Super+Tab` again returns to the
+browser. On a touchpad, a 3-finger swipe down goes back to Quark from any workspace (sway 1.8 or newer).
 
 Screenshots land in `~/Pictures/Screenshots` (your XDG Pictures folder, if you set one), named by date and time. Each
 one is also copied to the clipboard, and a notification shows where it was saved. `Shift+Print` lets you drag out a
